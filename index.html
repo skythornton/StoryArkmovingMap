@@ -49,8 +49,9 @@
         })
         .then(data => {
             //console.log('GeoJSON loaded:', data);
-console.log('Route coordinates:', routeCoords);
             const routeCoords = [];
+
+            console.log('Route coordinates:', routeCoords);
 
             data.features.forEach(feature => {
                 const geom = feature.geometry;
