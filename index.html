@@ -48,8 +48,8 @@
             return response.json();
         })
         .then(data => {
-            console.log('GeoJSON loaded:', data);
-
+            //console.log('GeoJSON loaded:', data);
+console.log('Route coordinates:', routeCoords);
             const routeCoords = [];
 
             data.features.forEach(feature => {
@@ -90,7 +90,7 @@
     // Animation function
     function animate(routeCoords) {
         let index = 0;
-        const speed = 10; // milliseconds per step
+        const speed = 100; // milliseconds per step
 
         function step() {
             if (index < routeCoords.length) {
