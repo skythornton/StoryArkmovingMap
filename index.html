@@ -41,44 +41,47 @@ const carIcon = L.icon({
 const marker = L.marker([0, 0], {icon: carIcon}).addTo(map);
     
     //Route animation
-let routeCoords = [];
-let index = 0;
-const speed = 100; // ms per step
+    let routeCoords = [];
 
 fetch('route.geojson')
   .then(res => res.json())
   .then(data => {
-    // Draw the route on the map
-    const routeLine = L.geoJSON(data, {
-      style: {
-        color: 'red',
-        weight: 4
-      }
-    }).addTo(map);
-
-    // Extract coordinates from GeoJSON
+    // Extract coordinates from each Point feature
     data.features.forEach(feature => {
-      const coords = feature.geometry.coordinates;
-      coords.forEach(coord => {
-        routeCoords.push([coord[1], coord[0]]); // Flip [lon, lat] to [lat, lon]
-      });
+      const coord = feature.geometry.coordinates;
+      routeCoords.push([coord[1], coord[0]]); // Convert [lon, lat] to [lat, lon]
     });
-animate();
 
-  
+    // Draw the polyline connecting the points
+    const routeLine = L.polyline(routeCoords, {color: 'red', weight: 4}).addTo(map);
+
+    // Center the map on the route
+    map.fitBounds(routeLine.getBounds());
+
+    // Start the marker at the first point
+    if (routeCoords.length > 0) {
+      marker.setLatLng(routeCoords[0]);
+      marker.setOpacity(1);
+      animate();
+    }
+  });
+
+let index = 0;
+const speed = 1000; // ms per step — adjust for speed
 
 function animate() {
-    if (routeCoords.length === 0) return; // Wait until coords are loaded
+    if (routeCoords.length === 0) return;
 
     if (index < routeCoords.length) {
         marker.setLatLng(routeCoords[index]);
         index++;
         setTimeout(animate, speed);
     } else {
-        index = 0; // Loop animation
-        animate();
+        index = 0;
+        animate(); // Loop back to start
     }
 }
+
 </script>
 
 </body>
