@@ -93,13 +93,21 @@
 
     // Animation function
     function animate(routeCoords) {
-    let index = 0;
-    setInterval(() => {
-        marker.setLatLng(routeCoords[index]);
-        console.log('Marker moved to:', routeCoords[index]);
-        index = (index + 1) % routeCoords.length;
-    }, 1000);
-}
+        let index = 0;
+        const speed = 500; // milliseconds per step
+
+        function step() {
+            if (index < routeCoords.length) {
+                marker.setLatLng(routeCoords[index]);
+                console.log('Moving to:', routeCoords[index]);
+                index++;
+                setTimeout(step, speed);
+            } else {
+                index = 0;
+                step(); // Loop back to start
+            }
+        }
+
         step();
     }
 </script>
