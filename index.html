@@ -33,7 +33,7 @@
     // Car icon
     const carIcon = L.icon({
     iconUrl: 'storyark_car.png',  // <-- your custom image
-    iconSize: [40, 60],           // <-- adjust size as needed
+    iconSize: [70, 30],           // <-- adjust size as needed
     iconAnchor: [25, 25]          // <-- center point (half of iconSize)
 });
 
@@ -90,7 +90,7 @@
     // Animation function
     function animate(routeCoords) {
         let index = 0;
-        const speed = 100; // milliseconds per step
+        const speed = 1000; // milliseconds per step
 
         function step() {
             if (index < routeCoords.length) {
