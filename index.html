@@ -24,71 +24,70 @@
     // Initialize the map centered on South Africa
     const map = L.map('map').setView([-29.5, 24], 6);
 
+
     // Add map tiles (OpenStreetMap)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
+    
+let routeCoords = [];
 
-    // Journey coordinates (converted to decimal format with "." instead of ",")
-    const route = [
-        [-32.178954, 19.15978],
-[-31.605018, 18.74294],
-[-29.21956, 17.46331],
-[-28.47845, 16.68409],
-[-29.25917, 16.87125],
-[-29.21956, 17.46331],
-[-31.37952, 19.10548],
-[-32.74808, 19.29422],
-[-31.375924, 19.10548],
-[-32.178954, 19.15978],
-[-34.03475, 18.35351],
-[-34.13655, 21.71733],
-[-32.25423, 24.5309],
-[-30.72694, 27.34647],
-[-31.06024, 28.32968],
-[-30.6903, 28.49926],
-[-30.80588, 27.26744],
-[-30.39626, 27.62554],
-[-29.84496, 27.6014],
-[-29.8424, 28.04999],
-[-29.33701, 28.50585],
-[-28.82046, 28.72724],
-[-28.51431, 28.41119],
-[-29.04649, 30.2985],
-[-29.49383, 30.22067],
-[-30.35994, 28.79578],
-[-29.04649, 30.2985],
-[-28.02468, 32.27533],
-[-28.024641, 32.273816],
-
-    ];
-
-    // Draw the route line (background path)
-    const polyline = L.polyline(route, {color: 'red', weight: 3, dashArray: '5, 10'}).addTo(map);
-
-    // Add a moving marker
-    const marker = L.circleMarker(route[0], {
-        radius: 6,
+fetch('route.geojson')
+  .then(res => res.json())
+  .then(data => {
+    // Draw the route on the map
+    const routeLine = L.geoJSON(data, {
+      style: {
         color: 'red',
-        fillColor: '#f03',
-        fillOpacity: 0.9
+        weight: 4
+      }
     }).addTo(map);
 
-    let index = 0;
+    // Extract coordinates from GeoJSON
+    data.features.forEach(feature => {
+      const coords = feature.geometry.coordinates;
+      coords.forEach(coord => {
+        routeCoords.push([coord[1], coord[0]]); // Flip [lon, lat] to [lat, lon]
+      });
+    });
 
-    function animate() {
-        if (index < route.length) {
-            marker.setLatLng(route[index]);
-            index++;
-            setTimeout(animate, 2000); // 2000ms = 2 seconds per point
-        } else {
-            index = 0;
-            animate(); // Loop the animation
-        }
+    // Car icon
+const carIcon = L.icon({
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/743/743007.png',
+    iconSize: [40, 40],
+    iconAnchor: [20, 20]
+});
+
+// Marker at starting point
+const marker = L.marker([0, 0], {icon: carIcon}).addTo(map);
+
+    // Add a moving marker
+      // Car icon
+const carIcon = L.icon({
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/743/743007.png',
+    iconSize: [40, 40],
+    iconAnchor: [20, 20]
+});
+
+// Marker at starting point
+const marker = L.marker([0, 0], {icon: carIcon}).addTo(map);
+
+   let index = 0;
+const speed = 100; // ms between points (adjust for speed)
+
+function animate() {
+    if (routeCoords.length === 0) return; // Wait until coords are loaded
+
+    if (index < routeCoords.length) {
+        marker.setLatLng(routeCoords[index]);
+        index++;
+        setTimeout(animate, speed);
+    } else {
+        index = 0; // Loop animation
+        animate();
     }
-
-    animate();
+}
 </script>
 
 </body>
