@@ -24,7 +24,7 @@
     // Initialize the map centered on South Africa
     const map = L.map('map').setView([-29.5, 24], 6);
 
-    // Add map tiles
+    // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
         attribution: '© OpenStreetMap contributors'
@@ -32,65 +32,78 @@
 
     // Car icon
     const carIcon = L.icon({
-        iconUrl: 'https://cdn-icons-png.flaticon.com/512/743/743007.png',
-        iconSize: [40, 40],
-        iconAnchor: [20, 20]
-    });
+    iconUrl: 'storyark_car.png',  // <-- your custom image
+    iconSize: [50, 50],           // <-- adjust size as needed
+    iconAnchor: [25, 25]          // <-- center point (half of iconSize)
+});
 
-    // Marker setup (initially hidden)
+
+    // Marker (starts hidden)
     const marker = L.marker([0, 0], {icon: carIcon, opacity: 0}).addTo(map);
 
-    // Animation variables
-    let routeCoords = [];
-    let index = 0;
-    const speed = 1000; // milliseconds per step
-
-    // Fetch the route GeoJSON
+    // Fetch the GeoJSON route
     fetch('route.geojson')
         .then(response => {
             if (!response.ok) throw new Error('Failed to load route.geojson');
             return response.json();
         })
         .then(data => {
-            console.log('GeoJSON Loaded:', data);
+            console.log('GeoJSON loaded:', data);
 
-            // Extract point coordinates
+            const routeCoords = [];
+
             data.features.forEach(feature => {
-                if (feature.geometry.type === 'Point') {
-                    const [lon, lat] = feature.geometry.coordinates;
-                    routeCoords.push([lat, lon]);
+                const geom = feature.geometry;
+
+                if (geom.type === 'LineString') {
+                    geom.coordinates.forEach(coord => {
+                        routeCoords.push([coord[1], coord[0]]); // [lat, lon]
+                    });
+                }
+
+                if (geom.type === 'MultiLineString') {
+                    geom.coordinates.forEach(line => {
+                        line.forEach(coord => {
+                            routeCoords.push([coord[1], coord[0]]);
+                        });
+                    });
                 }
             });
 
             if (routeCoords.length === 0) {
-                throw new Error('No valid points found in GeoJSON');
+                throw new Error('No route coordinates found in GeoJSON');
             }
 
             // Draw the route line
             const routeLine = L.polyline(routeCoords, {color: 'red', weight: 4}).addTo(map);
-
-            // Fit the map to the route
             map.fitBounds(routeLine.getBounds());
 
-            // Initialize marker
+            // Initialize marker at start
             marker.setLatLng(routeCoords[0]);
             marker.setOpacity(1);
 
             // Start animation
-            animate();
+            animate(routeCoords);
         })
         .catch(err => console.error('Error loading GeoJSON:', err));
 
     // Animation function
-    function animate() {
-        if (index < routeCoords.length) {
-            marker.setLatLng(routeCoords[index]);
-            index++;
-            setTimeout(animate, speed);
-        } else {
-            index = 0;
-            animate(); // Loop back to start
+    function animate(routeCoords) {
+        let index = 0;
+        const speed = 100; // milliseconds per step
+
+        function step() {
+            if (index < routeCoords.length) {
+                marker.setLatLng(routeCoords[index]);
+                index++;
+                setTimeout(step, speed);
+            } else {
+                index = 0;
+                step(); // Loop back to start
+            }
         }
+
+        step();
     }
 </script>
 
