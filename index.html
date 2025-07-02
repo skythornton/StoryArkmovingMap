@@ -91,8 +91,9 @@
     // Animation function
     function animate(routeCoords) {
         let index = 0;
-        const speed = 5000; // milliseconds per step
-
+        const speed = 50; // milliseconds per step
+        console.log('speed' , speed);
+        
         function step() {
             if (index < routeCoords.length) {
                 marker.setLatLng(routeCoords[index]);
