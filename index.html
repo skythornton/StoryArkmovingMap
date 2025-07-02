@@ -31,7 +31,19 @@
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
     
+      // Car icon
+const carIcon = L.icon({
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/743/743007.png',
+    iconSize: [40, 40],
+    iconAnchor: [20, 20]
+});
+    // Marker at starting point
+const marker = L.marker([0, 0], {icon: carIcon}).addTo(map);
+    
+    //Route animation
 let routeCoords = [];
+let index = 0;
+const speed = 100; // ms per step
 
 fetch('route.geojson')
   .then(res => res.json())
@@ -51,30 +63,9 @@ fetch('route.geojson')
         routeCoords.push([coord[1], coord[0]]); // Flip [lon, lat] to [lat, lon]
       });
     });
+animate();
 
-    // Car icon
-const carIcon = L.icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/743/743007.png',
-    iconSize: [40, 40],
-    iconAnchor: [20, 20]
-});
-
-// Marker at starting point
-const marker = L.marker([0, 0], {icon: carIcon}).addTo(map);
-
-    // Add a moving marker
-      // Car icon
-const carIcon = L.icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/743/743007.png',
-    iconSize: [40, 40],
-    iconAnchor: [20, 20]
-});
-
-// Marker at starting point
-const marker = L.marker([0, 0], {icon: carIcon}).addTo(map);
-
-   let index = 0;
-const speed = 100; // ms between points (adjust for speed)
+  
 
 function animate() {
     if (routeCoords.length === 0) return; // Wait until coords are loaded
