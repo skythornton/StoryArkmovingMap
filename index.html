@@ -32,27 +32,27 @@
 
     // Car icon
     const carIcon = L.icon({
-    iconUrl: 'storyark_car.png',  // <-- your custom image
-    iconSize: [70, 30],           // <-- adjust size as needed
-    iconAnchor: [25, 25]          // <-- center point (half of iconSize)
-});
-
+        iconUrl: 'storyark_car.png',  // <-- your custom image
+        iconSize: [70, 30],           // <-- adjust size as needed
+        iconAnchor: [35, 15]          // <-- center horizontally, middle vertically
+    });
 
     // Marker (starts hidden)
     const marker = L.marker([0, 0], {icon: carIcon, opacity: 0}).addTo(map);
 
-    // Fetch the GeoJSON route
+    // Route coordinates declared globally
     let routeCoords = [];
 
+    // Fetch the GeoJSON route
     fetch('route.geojson')
         .then(response => {
             if (!response.ok) throw new Error('Failed to load route.geojson');
             return response.json();
         })
         .then(data => {
-            //console.log('GeoJSON loaded:', data);
-console.log('Route coordinates:', routeCoords);
-            const routeCoords = [];
+            console.log('GeoJSON loaded:', data);
+
+            routeCoords = []; // Reset in case
 
             data.features.forEach(feature => {
                 const geom = feature.geometry;
@@ -71,6 +71,8 @@ console.log('Route coordinates:', routeCoords);
                     });
                 }
             });
+
+            console.log('Route coordinates:', routeCoords);
 
             if (routeCoords.length === 0) {
                 throw new Error('No route coordinates found in GeoJSON');
@@ -92,11 +94,12 @@ console.log('Route coordinates:', routeCoords);
     // Animation function
     function animate(routeCoords) {
         let index = 0;
-        const speed = 100; // milliseconds per step
+        const speed = 500; // milliseconds per step
 
         function step() {
             if (index < routeCoords.length) {
                 marker.setLatLng(routeCoords[index]);
+                console.log('Moving to:', routeCoords[index]);
                 index++;
                 setTimeout(step, speed);
             } else {
