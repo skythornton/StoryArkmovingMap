@@ -43,7 +43,7 @@ const marker = L.marker([0, 0], {icon: carIcon}).addTo(map);
     //Route animation
     let routeCoords = [];
 
-fetch('route.geojson')
+fetch(data/'route.geojson')
   .then(res => res.json())
   .then(data => {
     // Extract coordinates from each Point feature
