@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>South Africa Journey Map</title>
+    <title>Story Ark Moving Map</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -65,7 +65,7 @@
     ];
 
     // Draw the route line (background path)
-    const polyline = L.polyline(route, {color: 'gray', weight: 3, dashArray: '5, 10'}).addTo(map);
+    const polyline = L.polyline(route, {color: 'red', weight: 3, dashArray: '5, 10'}).addTo(map);
 
     // Add a moving marker
     const marker = L.circleMarker(route[0], {
@@ -81,7 +81,7 @@
         if (index < route.length) {
             marker.setLatLng(route[index]);
             index++;
-            setTimeout(animate, 1000); // 1000ms = 1 second per point
+            setTimeout(animate, 2000); // 2000ms = 2 seconds per point
         } else {
             index = 0;
             animate(); // Loop the animation
