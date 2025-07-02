@@ -42,6 +42,8 @@
     const marker = L.marker([0, 0], {icon: carIcon, opacity: 0}).addTo(map);
 
     // Fetch the GeoJSON route
+    let routeCoords = [];
+
     fetch('route.geojson')
         .then(response => {
             if (!response.ok) throw new Error('Failed to load route.geojson');
