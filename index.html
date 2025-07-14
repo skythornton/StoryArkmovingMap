@@ -22,14 +22,30 @@
 
 <script>
     // Initialize map
-    const map = L.map('map').setView([-29.5, 24], 6);
+    const map = L.map('map', {
+    center: [-30.5595, 22.9375],
+    zoom: 6,
+    minZoom: 5,
+    maxZoom: 10,
+    maxBounds: [
+        [-37, 10],
+        [-20, 35]
+    ],
+    maxBoundsViscosity: 0.8,
+    zoomControl: false // turn off default
+});
 
-    // Add OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 18,
-        attribution: '© OpenStreetMap contributors'
+// Add custom zoom control on top right
+L.control.zoom({
+    position: 'topright' // move buttons
+}).addTo(map);
+    
+    // Base map
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap & CartoDB',
+        maxZoom: 19
     }).addTo(map);
-
+    
     // Add moving car marker
     const carIcon = L.icon({
         iconUrl: 'storyark_car.png', // Replace with your car image
