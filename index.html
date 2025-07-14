@@ -84,8 +84,8 @@
     const marker = L.marker([0, 0], {icon: carIcon, opacity: 0}).addTo(map);
 
     //timeline
-    const startDate = new Date('2025-01-01'); // Change to your start date
-    const endDate = new Date('2025-01-10');   // Change to your end date
+    const startDate = new Date('2024-10-06'); // Change to your start date
+    const endDate = new Date('2025-06-19');   // Change to your end date
     const totalTime = endDate - startDate;    // Total duration in ms
 
 
@@ -147,8 +147,8 @@
         }
 
         let progress = 0; // Progress along the route in meters
-        const stepSize = 100; // Distance per frame in meters
-        const animationSpeed = 1; // Delay between frames in ms
+        const stepSize = 120; // Distance per frame in meters
+        const animationSpeed = 0.5; // Delay between frames in ms
 
         function interpolatePosition(progress) {
             for (let i = 1; i < distances.length; i++) {
