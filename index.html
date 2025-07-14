@@ -32,11 +32,10 @@
 
     // Car icon
     const carIcon = L.icon({
-    iconUrl: 'storyark_car.png',  // <-- your custom image
-    iconSize: [70, 30],           // <-- adjust size as needed
-    iconAnchor: [25, 25]          // <-- center point (half of iconSize)
-});
-
+        iconUrl: 'storyark_car.png',  // <-- your custom image
+        iconSize: [70, 30],           // <-- adjust size as needed
+        iconAnchor: [35, 15]          // <-- adjust anchor to center bottom
+    });
 
     // Marker (starts hidden)
     const marker = L.marker([0, 0], {icon: carIcon, opacity: 0}).addTo(map);
@@ -48,10 +47,7 @@
             return response.json();
         })
         .then(data => {
-            //console.log('GeoJSON loaded:', data);
             const routeCoords = [];
-
-            console.log('Route coordinates:', routeCoords);
 
             data.features.forEach(feature => {
                 const geom = feature.geometry;
@@ -83,26 +79,50 @@
             marker.setLatLng(routeCoords[0]);
             marker.setOpacity(1);
 
-            // Start animation
-            animate(routeCoords);
+            // Start smooth animation
+            animateSmooth(routeCoords);
         })
         .catch(err => console.error('Error loading GeoJSON:', err));
 
-    // Animation function
-    function animate(routeCoords) {
-        let index = 0;
-        const speed = 0.5; // milliseconds per step
-        console.log('speed' , speed);
-        
-        function step() {
-            if (index < routeCoords.length) {
-                marker.setLatLng(routeCoords[index]);
-                index++;
-                setTimeout(step, speed);
-            } else {
-                index = 0;
-                step(); // Loop back to start
+    // Smooth animation function
+    function animateSmooth(routeCoords) {
+        let totalDistance = 0;
+        const distances = [0];
+
+        // Calculate cumulative distance between points
+        for (let i = 1; i < routeCoords.length; i++) {
+            const from = L.latLng(routeCoords[i - 1]);
+            const to = L.latLng(routeCoords[i]);
+            totalDistance += from.distanceTo(to);
+            distances.push(totalDistance);
+        }
+
+        let progress = 0; // Progress along the route in meters
+        const stepSize = 50; // Distance per frame in meters
+        const animationSpeed = 20; // Delay between frames in ms
+
+        function interpolatePosition(progress) {
+            for (let i = 1; i < distances.length; i++) {
+                if (progress <= distances[i]) {
+                    const ratio = (progress - distances[i - 1]) / (distances[i] - distances[i - 1]);
+                    const lat = routeCoords[i - 1][0] + (routeCoords[i][0] - routeCoords[i - 1][0]) * ratio;
+                    const lng = routeCoords[i - 1][1] + (routeCoords[i][1] - routeCoords[i - 1][1]) * ratio;
+                    return [lat, lng];
+                }
             }
+            return routeCoords[routeCoords.length - 1];
+        }
+
+        function step() {
+            if (progress > totalDistance) {
+                progress = 0; // Restart loop
+            }
+
+            const position = interpolatePosition(progress);
+            marker.setLatLng(position);
+
+            progress += stepSize;
+            setTimeout(step, animationSpeed);
         }
 
         step();
