@@ -11,6 +11,19 @@
     <style>
         body { margin:0; padding:0; }
         #map { width: 100%; height: 100vh; }
+        .legend {
+            background: white;
+            line-height: 1.5;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+        .legend img {
+            vertical-align: middle;
+            width: 25px;
+            height: 25px;
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
@@ -122,6 +135,19 @@ L.control.zoom({
         step();
     }
 
+     const logIcon = L.icon({
+        iconUrl: 'log_icon.png',  // Replace with your Captain’s Log icon
+        iconSize: [40, 40],
+        iconAnchor: [20, 40],
+        popupAnchor: [0, -40]
+    });
+    const diaryIcon = L.icon({
+        iconUrl: 'diary_icon.png', // Replace with your Story Ark Diaries icon
+        iconSize: [40, 40],
+        iconAnchor: [20, 40],
+        popupAnchor: [0, -40]
+    });
+
     // Add all clickable markers
     const storyMarkers = [
         { title: "Captain’s Log: Six months in, slow as can be", link: "https://www.storyark.co.za/captains-log/Blog%20Post%20Title%20One-k44nk", coords: [-28.500546, 28.437972] },
@@ -156,12 +182,26 @@ L.control.zoom({
         { title: "Story Ark Diaries: Going feral", link: "https://youtube.com/shorts/JYzWX_ViMi4?feature=share", coords: [-28.820691, 28.727339] }
     ];
 
-    // Add markers to the map
     storyMarkers.forEach(entry => {
         const popupContent = `<a href="${entry.link}" target="_blank">${entry.title}</a>`;
-        L.marker(entry.coords).addTo(map)
+        const icon = entry.title.includes("Captain’s Log") ? logIcon : diaryIcon;
+        L.marker(entry.coords, { icon: icon }).addTo(map)
             .bindPopup(popupContent);
     });
+
+    // Add a map legend
+    const legend = L.control({ position: "bottomright" });
+    legend.onAdd = function(map) {
+        const div = L.DomUtil.create("div", "legend");
+        div.innerHTML += `
+            <h4>Legend</h4>
+            <p><img src="log_icon.png"> Captain’s Log</p>
+            <p><img src="diary_icon.png"> Story Ark Diaries</p>
+        `;
+        return div;
+    };
+    legend.addTo(map);
+    
 </script>
 
 </body>
