@@ -41,9 +41,9 @@
     const marker = L.marker([0, 0], {icon: carIcon, opacity: 0}).addTo(map);
 
     // Fetch the GeoJSON route
-    fetch('route.json')
+    fetch('StoryArk_journey.json')
         .then(response => {
-            if (!response.ok) throw new Error('Failed to load route.geojson');
+            if (!response.ok) throw new Error('Failed to load StoryArk_journey.geojson');
             return response.json();
         })
         .then(data => {
@@ -98,8 +98,8 @@
         }
 
         let progress = 0; // Progress along the route in meters
-        const stepSize = 80; // Distance per frame in meters
-        const animationSpeed = 5; // Delay between frames in ms
+        const stepSize = 100; // Distance per frame in meters
+        const animationSpeed = 1; // Delay between frames in ms
 
         function interpolatePosition(progress) {
             for (let i = 1; i < distances.length; i++) {
