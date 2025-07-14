@@ -80,6 +80,12 @@
     // Marker (starts hidden)
     const marker = L.marker([0, 0], {icon: carIcon, opacity: 0}).addTo(map);
 
+    //timeline
+    const startDate = new Date('2025-01-01'); // Change to your start date
+    const endDate = new Date('2025-01-10');   // Change to your end date
+    const totalTime = endDate - startDate;    // Total duration in ms
+
+
     // Fetch the GeoJSON route
     fetch('StoryArk_journey.json')
         .then(response => {
