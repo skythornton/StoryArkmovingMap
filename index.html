@@ -11,60 +11,17 @@
     <style>
         body { margin:0; padding:0; }
         #map { width: 100%; height: 100vh; }
-
-        /* Timeline styles */
-        #timeline-container {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 30px;
-            background-color: #ccc;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: sans-serif;
-            font-size: 14px;
-            color: #333;
-            z-index: 1000
-        
-        }
-
-        #timeline-progress {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 5px;
-            background-color: #4caf50; /* green progress bar */
-            width: 0%;
-            transition: width 0.05s linear;
-            z-index: 1001
-        }
-
-        #timeline-label {
-            z-index: 1002;
-            background: rgba(255,255,255,0.8);
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        
     </style>
 </head>
 <body>
 
 <div id="map"></div>
 
-<div id="timeline-container">
-    <div id="timeline-progress"></div>
-    <div id="timeline-label">Start Date</div>
-</div>
-
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
-    // Initialize the map centered on South Africa
+    // Initialize map
     const map = L.map('map').setView([-29.5, 24], 6);
 
     // Add OpenStreetMap tiles
@@ -73,40 +30,26 @@
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Car icon
+    // Add moving car marker
     const carIcon = L.icon({
-        iconUrl: 'storyark_car.png',  // <-- your custom image
-        iconSize: [70, 30],           // <-- adjust size as needed
-        iconAnchor: [35, 15]          // <-- adjust anchor to center bottom
+        iconUrl: 'storyark_car.png', // Replace with your car image
+        iconSize: [70, 30],
+        iconAnchor: [35, 15]
     });
-
-    // Marker (starts hidden)
     const marker = L.marker([0, 0], {icon: carIcon, opacity: 0}).addTo(map);
 
-    //timeline
-    const startDate = new Date('2024-10-06'); // Change to your start date
-    const endDate = new Date('2025-06-19');   // Change to your end date
-    const totalTime = endDate - startDate;    // Total duration in ms
-
-
-    // Fetch the GeoJSON route
-    fetch('StoryArk_journey.json')
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to load StoryArk_journey.geojson');
-            return response.json();
-        })
+    // Animate car along route
+    fetch('route.geojson')
+        .then(response => response.json())
         .then(data => {
             const routeCoords = [];
-
             data.features.forEach(feature => {
                 const geom = feature.geometry;
-
                 if (geom.type === 'LineString') {
                     geom.coordinates.forEach(coord => {
-                        routeCoords.push([coord[1], coord[0]]); // [lat, lon]
+                        routeCoords.push([coord[1], coord[0]]);
                     });
                 }
-
                 if (geom.type === 'MultiLineString') {
                     geom.coordinates.forEach(line => {
                         line.forEach(coord => {
@@ -115,30 +58,18 @@
                     });
                 }
             });
-
-            if (routeCoords.length === 0) {
-                throw new Error('No route coordinates found in GeoJSON');
-            }
-
-            // Draw the route line
             const routeLine = L.polyline(routeCoords, {color: 'red', weight: 4}).addTo(map);
             map.fitBounds(routeLine.getBounds());
 
-            // Initialize marker at start
             marker.setLatLng(routeCoords[0]);
             marker.setOpacity(1);
-
-            // Start smooth animation
             animateSmooth(routeCoords);
-        })
-        .catch(err => console.error('Error loading GeoJSON:', err));
+        });
 
-    // Smooth animation function
     function animateSmooth(routeCoords) {
         let totalDistance = 0;
         const distances = [0];
 
-        // Calculate cumulative distance between points
         for (let i = 1; i < routeCoords.length; i++) {
             const from = L.latLng(routeCoords[i - 1]);
             const to = L.latLng(routeCoords[i]);
@@ -146,9 +77,9 @@
             distances.push(totalDistance);
         }
 
-        let progress = 0; // Progress along the route in meters
-        const stepSize = 120; // Distance per frame in meters
-        const animationSpeed = 0.5; // Delay between frames in ms
+        let progress = 0;
+        const stepSize = 150;
+        const animationSpeed = 0.5;
 
         function interpolatePosition(progress) {
             for (let i = 1; i < distances.length; i++) {
@@ -166,31 +97,55 @@
             if (progress > totalDistance) {
                 progress = 0; // Restart loop
             }
-
             const position = interpolatePosition(progress);
             marker.setLatLng(position);
-
-            // Update timeline progress bar
-            const progressPercent = (progress / totalDistance) * 100;
-            document.getElementById('timeline-progress').style.width = progressPercent + '%';
-
-            // Calculate current date
-            const elapsed = (progress / totalDistance) * totalTime;
-            const currentDate = new Date(startDate.getTime() + elapsed);
-
-            // Format date as YYYY-MM-DD
-            const formattedDate = currentDate.toISOString().split('T')[0];
-
-            // Update timeline label
-            document.getElementById('timeline-label').innerText = formattedDate;
-
             progress += stepSize;
             setTimeout(step, animationSpeed);
         }
 
         step();
     }
-    
+
+    // Add all clickable markers
+    const storyMarkers = [
+        { title: "Captain’s Log: Six months in, slow as can be", link: "https://www.storyark.co.za/captains-log/Blog%20Post%20Title%20One-k44nk", coords: [-28.500546, 28.437972] },
+        { title: "Captain’s Log: Into the flames", link: "https://www.storyark.co.za/captains-log/into-the-flames", coords: [-32.178236, 19.160587] },
+        { title: "Story Ark Diaries: Here we go", link: "https://youtu.be/5w8PaHTJVeE", coords: [-33.977020, 18.496226] },
+        { title: "Story Ark Diaries: On being brave", link: "https://youtu.be/RDQRIrlcWN4", coords: [-31.376805, 19.133976] },
+        { title: "Story Ark Diaries: Leaving the safe harbour", link: "https://youtu.be/nrjCleNi7qE", coords: [-33.927543, 18.587417] },
+        { title: "Story Ark Diaries: Moment of Zen - quiver trees", link: "https://youtu.be/v4wafK3BE0s", coords: [-31.418914, 19.250895] },
+        { title: "Story Ark Diaries: Moment of Zen - Cederberg", link: "https://youtu.be/COCIYdMPc7c", coords: [-32.748081, 19.294222] },
+        { title: "Story Ark Diaries: Fender-bender", link: "https://maps.app.goo.gl/JmXTA1Wvt5f3S1256", coords: [-31.450744, 18.950759] },
+        { title: "Story Ark Diaries: The origin story", link: "https://youtu.be/e6tazPDxp1U", coords: [-33.996137, 18.396024] },
+        { title: "Story Ark Diaries: Desert reign - an experimental sound-story", link: "https://youtu.be/8ZTUM_jL9h8", coords: [-29.039515, 17.104591] },
+        { title: "Story Ark Diaries: Bad-ass punk lily", link: "https://youtu.be/Fp9_L314eCA", coords: [-31.137101, 19.193513] },
+        { title: "Story Ark Diaries: Tending the dead", link: "https://youtu.be/n53UjoHvOkw", coords: [-31.185947, 27.489078] },
+        { title: "Story Ark Diaries: The dog ate my homework", link: "https://youtu.be/UqIxgy2jnmk", coords: [-34.136575, 21.717111] },
+        { title: "Story Ark Diaries: Moment of Zen - calm", link: "https://youtu.be/i15Egb1V9NU", coords: [-31.185947, 27.489078] },
+        { title: "Story Ark Diaries: Time is running out", link: "https://youtu.be/m_T9mg5_v-Q", coords: [-31.205501, 30.043255] },
+        { title: "Story Ark Diaries: Salt of the Earth", link: "https://youtu.be/SYxobUbZVbM", coords: [-30.635641, 27.501025] },
+        { title: "Story Ark Diaries: Don’t panic, stay calm", link: "https://youtu.be/8AgjANVk75g", coords: [-30.726151, 27.822664] },
+        { title: "Story Ark Diaries: Childless cat lady", link: "https://youtu.be/n99GX3iNztk", coords: [-30.717890, 27.458709] },
+        { title: "Story Ark Diaries: Water shepherds", link: "https://youtu.be/064g1Hu4Uoo", coords: [-28.816380, 28.719290] },
+        { title: "Story Ark Diaries: Lesotho, by any other name", link: "https://youtu.be/ZEqCVtwGM9g", coords: [-29.363245, 28.351715] },
+        { title: "Story Ark Diaries: Waiting for the Barbarians", link: "https://youtu.be/TVSLZlKVjw4", coords: [-13.132975, 39.623579] },
+        { title: "Story Ark Diaries: Berg life", link: "https://youtu.be/umUtSZKzh80", coords: [-29.376895, 29.549334] },
+        { title: "Story Ark Diaries: These boots", link: "https://youtu.be/zWFeBr8EIlE", coords: [-28.919069, 17.070351] },
+        { title: "Story Ark Diaries: Dropping anchor", link: "https://youtu.be/zWFeBr8EIlE", coords: [-28.082242, 32.291739] },
+        { title: "Story Ark Diaries: Chief navigator Mouse keeping her mitts in shape", link: "https://youtube.com/shorts/bIlQsJlewjQ?feature=share", coords: [-31.059140, 28.360576] },
+        { title: "Story Ark Diaries: Maloti Mouse", link: "https://youtube.com/shorts/BnWvv4ZFReE?feature=share", coords: [-28.816380, 28.719290] },
+        { title: "Story Ark Diaries: Karnmelk River", link: "https://youtube.com/shorts/_tpPrD9pYkk?feature=share", coords: [-30.799125, 27.272007] },
+        { title: "Story Ark Diaries: Flying high", link: "https://youtube.com/shorts/1cgt2rETiB0?feature=share", coords: [-28.502370, 28.622331] },
+        { title: "Story Ark Diaries: Searching for vultures, finding crows", link: "https://youtube.com/shorts/0D1QfpyvP9I?feature=share", coords: [-28.514066, 28.653881] },
+        { title: "Story Ark Diaries: Going feral", link: "https://youtube.com/shorts/JYzWX_ViMi4?feature=share", coords: [-28.820691, 28.727339] }
+    ];
+
+    // Add markers to the map
+    storyMarkers.forEach(entry => {
+        const popupContent = `<a href="${entry.link}" target="_blank">${entry.title}</a>`;
+        L.marker(entry.coords).addTo(map)
+            .bindPopup(popupContent);
+    });
 </script>
 
 </body>
