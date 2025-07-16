@@ -136,13 +136,13 @@ L.control.zoom({
     }
 
      const logIcon = L.icon({
-        iconUrl: 'log.png',  // Replace with your Captain’s Log icon
+        iconUrl: 'diary.png',  // Replace with your Captain’s Log icon
         iconSize: [40, 40],
         iconAnchor: [20, 40],
         popupAnchor: [0, -40]
     });
     const diaryIcon = L.icon({
-        iconUrl: 'diary.png', // Replace with your Story Ark Diaries icon
+        iconUrl: 'log.png', // Replace with your Story Ark Diaries icon
         iconSize: [40, 40],
         iconAnchor: [20, 40],
         popupAnchor: [0, -40]
@@ -195,8 +195,8 @@ L.control.zoom({
         const div = L.DomUtil.create("div", "legend");
         div.innerHTML += `
             <h4>Legend</h4>
-            <p><img src="log.png"> Captain’s Log</p>
-            <p><img src="diary.png"> Story Ark Diaries</p>
+            <p><img src="diary.png"> Captain’s Log</p>
+            <p><img src="log.png"> Story Ark Diaries</p>
         `;
         return div;
     };
