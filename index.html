@@ -87,7 +87,7 @@ L.control.zoom({
                     });
                 }
             });
-            const routeLine = L.polyline(routeCoords, {color: 'red', weight: 4}).addTo(map);
+            const routeLine = L.polyline(routeCoords, {color: 'blue', weight: 4}).addTo(map);
             map.fitBounds(routeLine.getBounds());
 
             marker.setLatLng(routeCoords[0]);
