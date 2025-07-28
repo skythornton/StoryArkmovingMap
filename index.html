@@ -67,33 +67,39 @@ L.control.zoom({
     });
     const marker = L.marker([0, 0], {icon: carIcon, opacity: 0}).addTo(map);
 
-    // Animate car along route
-    fetch('route.geojson')
-        .then(response => response.json())
-        .then(data => {
-            const routeCoords = [];
-            data.features.forEach(feature => {
-                const geom = feature.geometry;
-                if (geom.type === 'LineString') {
-                    geom.coordinates.forEach(coord => {
-                        routeCoords.push([coord[1], coord[0]]);
-                    });
-                }
-                if (geom.type === 'MultiLineString') {
-                    geom.coordinates.forEach(line => {
-                        line.forEach(coord => {
-                            routeCoords.push([coord[1], coord[0]]);
-                        });
-                    });
-                }
-            });
-            const routeLine = L.polyline(routeCoords, {color: 'blue', weight: 4}).addTo(map);
-            map.fitBounds(routeLine.getBounds());
+    // Use OpenRouteService API to generate road-snapped route
+const apiKey = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjM1NmNkYWJlYmVjMDRiNzU5NzIwMjNiYTAxZmZkMTM5IiwiaCI6Im11cm11cjY0In0="; 
 
-            marker.setLatLng(routeCoords[0]);
-            marker.setOpacity(1);
-            animateSmooth(routeCoords);
-        });
+const coordinates = [
+    [18.4241, -33.9249],  // Cape Town (lng, lat)
+    [18.5, -32.0],        // Midway
+    [20.0, -30.0]         // End point
+];
+
+fetch("https://api.openrouteservice.org/v2/directions/driving-car/geojson", {
+    method: "POST",
+    headers: {
+        "Authorization": apiKey,
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ coordinates: coordinates })
+})
+.then(response => response.json())
+.then(data => {
+    const routeCoords = data.features[0].geometry.coordinates.map(coord => [coord[1], coord[0]]); // Convert to Leaflet format
+
+    const routeLine = L.polyline(routeCoords, { color: 'blue', weight: 4 }).addTo(map);
+    map.fitBounds(routeLine.getBounds());
+
+    marker.setLatLng(routeCoords[0]);
+    marker.setOpacity(1);
+    animateSmooth(routeCoords);
+
+    // (Optional) log to reuse later
+    console.log("Route coordinates:", JSON.stringify(routeCoords));
+})
+.catch(err => console.error("Routing failed:", err));
+
 
     function animateSmooth(routeCoords) {
         let totalDistance = 0;
