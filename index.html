@@ -125,6 +125,7 @@ const coordinates = [
     [-28.023997, 32.278165]
 ];
 
+console.log("Sending coordinates:", JSON.stringify({ coordinates: coordinates }));
 
 fetch("https://api.openrouteservice.org/v2/directions/driving-car/geojson", {
     method: "POST",
@@ -137,7 +138,7 @@ fetch("https://api.openrouteservice.org/v2/directions/driving-car/geojson", {
 .then(response => response.json())
 .then(data => {
     if (!data.features || !data.features[0]) {
-        console.error("OpenRouteService returned an error:", data);
+        console.error("OpenRouteService returned an error:", JSON.stringify(data, null, 2));
         return;
     }
 
