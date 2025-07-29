@@ -134,16 +134,14 @@ fetch("https://api.openrouteservice.org/v2/directions/driving-car/geojson", {
     },
     body: JSON.stringify({ coordinates: coordinates })
 })
-    
 .then(response => response.json())
 .then(data => {
     if (!data.features || !data.features[0]) {
         console.error("OpenRouteService returned an error:", data);
-        return; 
+        return;
     }
-        
-.then(data => {
-    const routeCoords = data.features[0].geometry.coordinates.map(coord => [coord[1], coord[0]]); // Convert to Leaflet format
+
+    const routeCoords = data.features[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
 
     const routeLine = L.polyline(routeCoords, { color: 'blue', weight: 4 }).addTo(map);
     map.fitBounds(routeLine.getBounds());
@@ -152,11 +150,9 @@ fetch("https://api.openrouteservice.org/v2/directions/driving-car/geojson", {
     marker.setOpacity(1);
     animateSmooth(routeCoords);
 
-    // (Optional) log to reuse later
     console.log("Route coordinates:", JSON.stringify(routeCoords));
 })
 .catch(err => console.error("Routing failed:", err));
-
 
     function animateSmooth(routeCoords) {
         let totalDistance = 0;
