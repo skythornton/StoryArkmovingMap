@@ -135,6 +135,10 @@ fetch("https://api.openrouteservice.org/v2/directions/driving-car/geojson", {
     body: JSON.stringify({ coordinates: coordinates })
 })
 .then(response => response.json())
+    if (!data.features) {
+    console.error("OpenRouteService returned an error:", data);
+    return;
+}
 .then(data => {
     const routeCoords = data.features[0].geometry.coordinates.map(coord => [coord[1], coord[0]]); // Convert to Leaflet format
 
