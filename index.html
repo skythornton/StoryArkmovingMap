@@ -22,7 +22,7 @@
             vertical-align: middle;
             width: 25px;
             height: 25px;
-            margin-right: 5px;
+            margin-left: 5px;
         }
     </style>
 </head>
@@ -147,7 +147,7 @@ fetch("https://api.openrouteservice.org/v2/directions/driving-car/geojson", {
 
     const routeCoords = data.features[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
 
-    const routeLine = L.polyline(routeCoords, { color: 'blue', weight: 4 }).addTo(map);
+    const routeLine = L.polyline(routeCoords, { color: #007bb8, weight: 4 }).addTo(map);
     map.fitBounds(routeLine.getBounds());
 
     marker.setLatLng(routeCoords[0]);
@@ -267,7 +267,7 @@ fetch("https://api.openrouteservice.org/v2/directions/driving-car/geojson", {
         .bindPopup(popupContent);
 });
 
-    // Add a map legend
+    // legend
     const legend = L.control({ position: "bottomright" });
     legend.onAdd = function(map) {
         const div = L.DomUtil.create("div", "legend");
