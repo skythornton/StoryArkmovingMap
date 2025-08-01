@@ -34,18 +34,6 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
-
-    function getYouTubeThumbnail(url) {
-    const videoId = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/))([\w-]+)/);
-    return videoId ? `https://img.youtube.com/vi/${videoId[1]}/hqdefault.jpg` : '';
-}
-
-    const popupContent = `
-    <a href="${entry.link}" target="_blank">
-        <strong>${entry.title}</strong><br/>
-        <img src="${getYouTubeThumbnail(entry.link)}" alt="Thumbnail" width="200"/>
-    </a>
-`;
     
     // Initialize map
     const map = L.map('map', {
@@ -257,12 +245,27 @@ fetch("https://api.openrouteservice.org/v2/directions/driving-car/geojson", {
         { title: "Story Ark Diaries: Going feral", link: "https://youtube.com/shorts/JYzWX_ViMi4?feature=share", coords: [-28.820691, 28.727339] }
     ];
 
+    function getYouTubeThumbnail(url) {
+    const videoId = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/))([\w-]+)/);
+    return videoId ? `https://img.youtube.com/vi/${videoId[1]}/hqdefault.jpg` : '';
+}
+    
     storyMarkers.forEach(entry => {
-        const popupContent = `<a href="${entry.link}" target="_blank">${entry.title}</a>`;
-        const icon = entry.title.includes("Captain’s Log") ? logIcon : diaryIcon;
-        L.marker(entry.coords, { icon: icon }).addTo(map)
-            .bindPopup(popupContent);
-    });
+    const icon = entry.title.includes("Captain’s Log") ? logIcon : diaryIcon;
+
+    const isYouTube = entry.link.includes("youtu");
+    const thumbnail = isYouTube ? `<img src="${getYouTubeThumbnail(entry.link)}" width="200"><br/>` : "";
+
+    const popupContent = `
+        <a href="${entry.link}" target="_blank">
+            <strong>${entry.title}</strong><br/>
+            ${thumbnail}
+        </a>
+    `;
+
+    L.marker(entry.coords, { icon: icon }).addTo(map)
+        .bindPopup(popupContent);
+});
 
     // Add a map legend
     const legend = L.control({ position: "bottomright" });
