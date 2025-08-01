@@ -34,6 +34,19 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
+
+    function getYouTubeThumbnail(url) {
+    const videoId = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/))([\w-]+)/);
+    return videoId ? `https://img.youtube.com/vi/${videoId[1]}/hqdefault.jpg` : '';
+}
+
+    const popupContent = `
+    <a href="${entry.link}" target="_blank">
+        <strong>${entry.title}</strong><br/>
+        <img src="${getYouTubeThumbnail(entry.link)}" alt="Thumbnail" width="200"/>
+    </a>
+`;
+    
     // Initialize map
     const map = L.map('map', {
     center: [-30.5595, 22.9375],
