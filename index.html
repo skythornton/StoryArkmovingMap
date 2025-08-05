@@ -56,6 +56,34 @@
     z-index: 999;
 }
         
+        @media (max-width: 768px) {
+    h1 {
+        font-size: 20px;
+    }
+
+    .legend {
+        font-size: 12px;
+        padding: 6px;
+    }
+
+    .legend img {
+        width: 16px;
+        height: 16px;
+        margin-left: 4px;
+    }
+
+    #static-car {
+        width: 50px;
+        bottom: 10px;
+        right: 10px;
+    }
+
+    footer {
+        font-size: 10px;
+        padding: 4px;
+    }
+}
+        
     </style>
 </head>
 <body>
@@ -69,6 +97,8 @@
 
 <script>
     
+    const initialZoom = window.innerWidth < 768 ? 5 : 6; // Mobile = zoomed out
+
     // Initialize map
     const map = L.map('map', {
     center: [-30.5595, 22.9375],
@@ -184,7 +214,10 @@ fetch("https://api.openrouteservice.org/v2/directions/driving-car/geojson", {
     const routeCoords = data.features[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
 
     const routeLine = L.polyline(routeCoords, { color: "#007bb8", weight: 4 }).addTo(map);
-    map.fitBounds(routeLine.getBounds());
+    
+    if (window.innerWidth >= 768) {
+    map.fitBounds(routeLine.getBounds()); // Only fit bounds on desktop/tablet
+}
 
     marker.setLatLng(routeCoords[0]);
     marker.setStyle({opacity: 1});
