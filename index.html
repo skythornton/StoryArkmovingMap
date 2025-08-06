@@ -239,8 +239,8 @@ fetch("https://api.openrouteservice.org/v2/directions/driving-car/geojson", {
         }
 
         let progress = 0;
-        const stepSize = 150;
-        const animationSpeed = 0.5;
+        const stepSize = 300;
+        const animationSpeed = 30;
 
         function interpolatePosition(progress) {
             for (let i = 1; i < distances.length; i++) {
