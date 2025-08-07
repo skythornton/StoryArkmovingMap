@@ -219,7 +219,7 @@ fetch("https://api.openrouteservice.org/v2/directions/driving-car/geojson", {
     map.fitBounds(routeLine.getBounds()); // Only fit bounds on desktop/tablet
 }
 
-    marker.setLatLng(routeCoords[0]);
+    
     marker.setStyle({opacity: 1});
     animateSmooth(routeCoords);
 
@@ -254,15 +254,18 @@ fetch("https://api.openrouteservice.org/v2/directions/driving-car/geojson", {
             return routeCoords[routeCoords.length - 1];
         }
 
-        function step() {
-            if (progress > totalDistance) {
-                progress = 0; // Restart loop
-            }
-            const position = interpolatePosition(progress);
-            marker.setLatLng(position);
-            progress += stepSize;
-            setTimeout(step, animationSpeed);
-        }
+       function step() {
+    const position = interpolatePosition(progress);
+    marker.setLatLng(position);
+    progress += stepSize;
+
+    if (progress <= totalDistance) {
+        setTimeout(step, animationSpeed);
+    } else {
+        progress = 0; // Restart if looping
+        setTimeout(step, animationSpeed); // optional: remove this if you don’t want looping
+    }
+}
 
         step();
     }
