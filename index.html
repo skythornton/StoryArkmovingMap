@@ -13,7 +13,6 @@
         body { margin:0; padding:0; }
         #map { width: 100%; height: 100vh; }
         .legend {
-            font-family: 'sans' serif;
             background: #F5F5F5;
             padding: 10px;
             line-height: 1.5em;
@@ -356,16 +355,17 @@ fetch("https://api.openrouteservice.org/v2/directions/driving-car/geojson", {
 
     // legend
     const legend = L.control({ position: "topleft" });
-    legend.onAdd = function(map) {
-        const div = L.DomUtil.create("div", "Ports of Call");
-        div.innerHTML += `
-            <h4>Legend</h4>
-            <p><img src="log.png"> Captain’s Log</p>
-            <p><img src="diary.png"> Story Ark Diaries</p>
-        `;
-        return div;
-    };
-    legend.addTo(map);
+legend.onAdd = function(map) {
+    const div = L.DomUtil.create("div", "legend");
+    div.innerHTML = `
+        <h4>Ports of Call</h4>
+        <p><img src="log.png"> Captain’s Log</p>
+        <p><img src="diary.png"> Story Ark Diaries</p>
+    `;
+    return div;
+};
+legend.addTo(map);
+    
 
 </script>
     
