@@ -233,7 +233,7 @@ function chunkArray(arr, size) {
   }
 
   // Animation function
-  function animateSmooth(routeCoords) {
+  function animateSmooth(routeCoords, step = 5) {
     let index = 0;
     function move() {
       if (index < routeCoords.length) {
@@ -246,7 +246,7 @@ function chunkArray(arr, size) {
   }
 
   async function fetchRoutes() {
-    const chunks = chunkArray(coordinates, 20); // adjust size if needed
+    const chunks = chunkArray(coordinates, 20); 
     let allRouteCoords = [];
 
     for (let i = 0; i < chunks.length - 1; i++) {
