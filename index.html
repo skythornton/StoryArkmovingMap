@@ -232,56 +232,81 @@ function chunkArray(arr, size) {
     return result;
   }
 
-  // Animation function
-  function animateSmooth(routeCoords, speed = 150) {
-    let index = 0;
-    function move() {
-      if (index < routeCoords.length) {
-        marker.setLatLng(routeCoords[index]);
-        index++;
-        requestAnimationFrame(move);
-      }
-    }
-    move();
-  }
-
   async function fetchRoutes() {
-    const chunks = chunkArray(coordinates, 20); 
-    let allRouteCoords = [];
+  const chunks = chunkArray(coordinates, 20); // adjust size if needed
+  let allRouteCoords = [];
 
-    for (let i = 0; i < chunks.length - 1; i++) {
-      const segment = [...chunks[i], chunks[i + 1][0]];
-      try {
-        const response = await fetch("https://api.openrouteservice.org/v2/directions/driving-car/geojson", {
-          method: "POST",
-          headers: {
-            "Authorization": apiKey,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ coordinates: segment })
-        });
-
-        const data = await response.json();
-        if (data.features && data.features[0]) {
-          const coords = data.features[0].geometry.coordinates.map(c => [c[1], c[0]]);
-          allRouteCoords = allRouteCoords.concat(coords);
-        } else {
-          console.error("ORS error on segment", i, data);
-        }
-      } catch (err) {
-        console.error("Fetch error on segment", i, err);
+  for (let i = 0; i < chunks.length - 1; i++) {
+    const segment = [...chunks[i], chunks[i + 1][0]]; // overlap to connect chunks
+    try {
+      const response = await fetch("https://api.openrouteservice.org/v2/directions/driving-car/geojson", {
+        method: "POST",
+        headers: {
+          "Authorization": apiKey,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ coordinates: segment })
+      });
+      const data = await response.json();
+      if (data.features && data.features[0]) {
+        const coords = data.features[0].geometry.coordinates.map(c => [c[1], c[0]]);
+        allRouteCoords = allRouteCoords.concat(coords);
+      } else {
+        console.error("ORS error on segment", i, data);
       }
-    }
-
-    if (allRouteCoords.length > 0) {
-      const routeLine = L.polyline(allRouteCoords, { color: "#007bb8", weight: 4 }).addTo(map);
-      map.fitBounds(routeLine.getBounds());
-      marker.setStyle({ opacity: 1 });
-      animateSmooth(allRouteCoords);
+    } catch (err) {
+      console.error("Fetch error on segment", i, err);
     }
   }
 
-  fetchRoutes();
+  if (allRouteCoords.length > 0) {
+    const routeLine = L.polyline(allRouteCoords, { color: "#007bb8", weight: 4 }).addTo(map);
+    map.fitBounds(routeLine.getBounds());
+
+    marker.setStyle({ opacity: 1 });
+    animateSmooth(allRouteCoords, 300); // pass speed here (higher = faster)
+  }
+}
+
+// Smooth animation function (works across the full combined array)
+function animateSmooth(routeCoords, speed = 150) {
+  let totalDistance = 0;
+  const distances = [0];
+
+  for (let i = 1; i < routeCoords.length; i++) {
+    totalDistance += L.latLng(routeCoords[i - 1]).distanceTo(L.latLng(routeCoords[i]));
+    distances.push(totalDistance);
+  }
+
+  let progress = 0;
+
+  function interpolatePosition(progress) {
+    for (let i = 1; i < distances.length; i++) {
+      if (progress <= distances[i]) {
+        const ratio = (progress - distances[i - 1]) / (distances[i] - distances[i - 1]);
+        const lat = routeCoords[i - 1][0] + (routeCoords[i][0] - routeCoords[i - 1][0]) * ratio;
+        const lng = routeCoords[i - 1][1] + (routeCoords[i][1] - routeCoords[i - 1][1]) * ratio;
+        return [lat, lng];
+      }
+    }
+    return routeCoords[routeCoords.length - 1];
+  }
+
+  function step() {
+    const pos = interpolatePosition(progress);
+    marker.setLatLng(pos);
+    progress += speed; // tweak this to adjust speed
+    if (progress <= totalDistance) {
+      requestAnimationFrame(step);
+    } else {
+      progress = 0; // optional: loop
+      requestAnimationFrame(step);
+    }
+  }
+
+  step();
+}
+
 
      const logIcon = L.icon({
         iconUrl: 'log.png',  // Replace with your Captain’s Log icon
