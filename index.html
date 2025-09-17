@@ -245,12 +245,6 @@ function chunkArray(arr, size) {
     move();
   }
 
-  const marker = L.circleMarker([-34.03333, 18.349998], {
-    radius: 8,
-    color: "red",
-    opacity: 0
-  }).addTo(map);
-
   async function fetchRoutes() {
     const chunks = chunkArray(coordinates, 20); // adjust size if needed
     let allRouteCoords = [];
