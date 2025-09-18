@@ -222,7 +222,13 @@ const apiKey = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjM1NmNkYWJl
 [32.673139, -27.554230],
 ];
 
-
+function chunkArray(arr, size) {
+  const result = [];
+  for (let i = 0; i < arr.length; i += size) {
+    result.push(arr.slice(i, i + size));
+  }
+  return result;
+}
 
 async function fetchRoutes() {
   const chunks = chunkArray(coordinates, 20); // keep below ORS 50 limit
