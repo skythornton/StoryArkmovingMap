@@ -349,17 +349,33 @@ async function fetchRoutes() {
   { date: "November 2024", coords: [-32.179535, 19.161850] }, // Cederberg area
   { date: "December 2024", coords: [-29.223664, 17.461603] }  // Namaqualand
 ];
-      timelinePoints.forEach(point => {
-  L.marker(point.coords, {
+     // create markers but keep them hidden initially
+const timelineMarkers = timelinePoints.map(point => {
+  return L.marker(point.coords, {
     icon: L.divIcon({
       className: "date-label",
       html: `<div>${point.date}</div>`,
       iconSize: [80, 20],
       iconAnchor: [40, -10]
-    })
+    }),
+    opacity: 0 // start hidden
   }).addTo(map);
 });
 
+// function to flash markers in sequence
+function flashTimelineMarkers(duration = 5000) {
+  timelineMarkers.forEach((marker, i) => {
+    setTimeout(() => {
+      marker.setOpacity(1); // show marker
+      setTimeout(() => {
+        marker.setOpacity(0); // hide after `duration`
+      }, duration);
+    }, i * duration); // stagger start times
+  });
+}
+
+// call the function
+flashTimelineMarkers();
     // legend
     const legend = L.control({ position: "topleft" });
 legend.onAdd = function(map) {
