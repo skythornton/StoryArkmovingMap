@@ -242,7 +242,7 @@ function chunkArray(arr, size) {
 async function fetchRoutes() {
   const chunks = chunkArray(coordinates, 20); // keep below ORS 50 limit
   let allRouteCoords = [];
-
+},
   for (let i = 0; i < chunks.length; i++) {
     // If not the last chunk, connect to the next
     const segment = (i < chunks.length - 1) 
@@ -377,7 +377,7 @@ legend.addTo(map);
 fetchRoutes(); 
 </script>
     
- <footer>
+<footer>
         By <a href="https://www.linkedin.com/in/skylathornton/" target="_blank">Skyla Thornton</a>,
         <a href="https://climate.sun.ac.za/" target="_blank">School for Climate Studies, Stellenbosch University</a>.
     </footer>
