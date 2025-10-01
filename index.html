@@ -265,13 +265,6 @@ async function fetchRoutes() {
   if (allRouteCoords.length > 0) {
     const routeLine = L.polyline(allRouteCoords, { color: "#007bb8", weight: 4 }).addTo(map);
 
-    marker.setStyle({ opacity: 1 });
-    animateSmooth(allRouteCoords, 300);
-  } else {
-    console.error("No route coordinates returned.");
-  }
-}
-
 
      const logIcon = L.icon({
         iconUrl: 'log.png',  // Replace with your Captain’s Log icon
