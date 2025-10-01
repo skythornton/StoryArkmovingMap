@@ -264,7 +264,6 @@ async function fetchRoutes() {
 
   if (allRouteCoords.length > 0) {
     const routeLine = L.polyline(allRouteCoords, { color: "#007bb8", weight: 4 }).addTo(map);
-    map.fitBounds(routeLine.getBounds());
 
     marker.setStyle({ opacity: 1 });
     animateSmooth(allRouteCoords, 300);
