@@ -356,35 +356,42 @@ async function fetchRoutes() {
 { date: "July 2025", coords: [-28.023694, 32.278251] },
 { date: "August 2025", coords: [-27.084545, 32.555073] },
 { date: "September 2025", coords: [-27.554230, 32.673139] }
-          
-];
-     // create markers but keep them hidden initially
-const timelineMarkers = timelinePoints.map(point => {
-  return L.marker(point.coords, {
-    icon: L.divIcon({
-      className: "date-label",
-      html: `<div>${point.date}</div>`,
-      iconSize: [80, 20],
-      iconAnchor: [40, -10]
-    }),
-    opacity: 0 // start hidden
-  }).addTo(map);
-});
+        
+const timelineMarkers = timelinePoints.map(point => L.marker(point.coords, {
+  icon: L.divIcon({
+    className: "date-label",
+    html: `<div>${point.date}</div>`,
+    iconSize: [80, 20],
+    iconAnchor: [40, -10]
+  })
+}));
 
-// function to flash markers in sequence
-function flashTimelineMarkers(duration = 5000) {
-  timelineMarkers.forEach((marker, i) => {
+function showTimelineMarkers() {
+  let index = 0;
+
+  function showNext() {
+    // Add marker to map
+    timelineMarkers[index].addTo(map);
+
+    // Determine delay: first marker 5s, rest 3s
+    const delay = index === 0 ? 5000 : 3000;
+
+    // Move to next marker after delay
     setTimeout(() => {
-      marker.setOpacity(1); // show marker
-      setTimeout(() => {
-        marker.setOpacity(0); // hide after `duration`
-      }, duration);
-    }, i * duration); // stagger start times
-  });
+      // Optional: remove marker if you want flashing effect
+      timelineMarkers[index].remove();
+
+      index = (index + 1) % timelineMarkers.length; // loop back to start
+      showNext(); // recursive call
+    }, delay);
+  }
+
+  showNext(); // start the loop
 }
 
-// call the function
-flashTimelineMarkers();
+// Call after map loads
+showTimelineMarkers();
+    
     // legend
     const legend = L.control({ position: "topleft" });
 legend.onAdd = function(map) {
