@@ -346,9 +346,9 @@ async function fetchRoutes() {
         .bindPopup(popupContent);
 });
       const timelinePoints = [
-  { date: "October 2024", coords: [-34.03333, 18.349998] },
-  { date: "November 2024", coords: [-32.179535, 19.161850] },
-  { date: "December 2024", coords: [-29.223664, 17.461603] }
+  { date: "October 2024", coords: [-34.03333, 18.349998] },   // Cape Town start
+  { date: "November 2024", coords: [-32.179535, 19.161850] }, // Cederberg area
+  { date: "December 2024", coords: [-29.223664, 17.461603] }  // Namaqualand
 ];
       timelinePoints.forEach(point => {
   L.marker(point.coords, {
