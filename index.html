@@ -229,6 +229,12 @@ const apiKey = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjM1NmNkYWJl
 [32.829112, -26.865665],
 [32.857627, -26.891302],
 [32.673139, -27.554230],
+[32.150915, -27.645594],
+[32.673139, -27.554230],
+[30.832138, -27.768476],
+[27.772201, -26.008783],
+[28.157879, -25.939629],
+[27.772201, -26.008783],
 ];
 
 function chunkArray(arr, size) {
@@ -356,6 +362,7 @@ async function fetchRoutes() {
 { date: "July 2025", coords: [-28.023694, 32.278251] },
 { date: "August 2025", coords: [-27.084545, 32.555073] },
 { date: "September 2025", coords: [-27.554230, 32.673139] }
+ { date: "October 2025", coords: [30.832138, -27.768476]}
  ];
         
 const timelineMarkers = timelinePoints.map(point => L.marker(point.coords, {
