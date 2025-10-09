@@ -319,9 +319,10 @@ async function fetchRoutes() {
   const chunks = chunkArray(coordinates, 20); // keep below ORS 50 limit
   let allRouteCoords = [];
 
+  // Fetch each route segment only once
   for (let i = 0; i < chunks.length; i++) {
-    const segment = (i < chunks.length - 1) 
-      ? [...chunks[i], chunks[i + 1][0]] 
+    const segment = (i < chunks.length - 1)
+      ? [...chunks[i], chunks[i + 1][0]]
       : chunks[i];
 
     try {
@@ -344,22 +345,16 @@ async function fetchRoutes() {
     } catch (err) {
       console.error("Fetch error on segment", i, err);
     }
-      if (allRouteCoords.length > 0) {
-  const routeLine = L.polyline(allRouteCoords, { color: "#007bb8", weight: 4 }).addTo(map);
-  map.fitBounds(routeLine.getBounds());
-
-  // Start synced animation between map and timeline
-  animateMarker(allRouteCoords, map, signpoints);
-}
   }
 
   if (allRouteCoords.length > 0) {
-  const routeLine = L.polyline(allRouteCoords, { color: "#007bb8", weight: 4 }).addTo(map);
-  map.fitBounds(routeLine.getBounds());
-  animateMarker(allRouteCoords); // start the animation here
-  initSyncedAnimation(map, 60000); // sync with the new timeline below
-}
+    const routeLine = L.polyline(allRouteCoords, { color: "#007bb8", weight: 4 }).addTo(map);
+    map.fitBounds(routeLine.getBounds());
+
+    // Start synced animation between map and timeline
+    animateMarker(allRouteCoords, map, signpoints);
   }
+}
 
     function animateMarker(routeCoords, duration = 60000) { // duration in ms
   let progress = 0;
