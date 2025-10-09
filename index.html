@@ -514,19 +514,6 @@ legend.onAdd = function(map) {
 };
 legend.addTo(map);
     
-if (allRouteCoords.length > 0) {
-    // Draw the route on the map
-    const routeLine = L.polyline(allRouteCoords, { color: "#007bb8", weight: 4 }).addTo(map);
-
-    // Zoom the map to fit the route
-    map.fitBounds(routeLine.getBounds());
-
-    // Animate the marker along the route
-    animateMarker(allRouteCoords);
-
-    // Start the timeline animation synced with the map
-    initSyncedAnimation(map, 60000); // 60 seconds duration
-}
     fetchRoutes();
     
 </script>
