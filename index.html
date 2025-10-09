@@ -350,7 +350,7 @@ async function fetchRoutes() {
   const routeLine = L.polyline(allRouteCoords, { color: "#007bb8", weight: 4 }).addTo(map);
   map.fitBounds(routeLine.getBounds());
   animateMarker(allRouteCoords); // start the animation here
-  initTimeline(); // sync with the new timeline below
+  initTimelineFromSignpoints(); // sync with the new timeline below
 }
   }
 
