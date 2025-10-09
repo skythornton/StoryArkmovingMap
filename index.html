@@ -106,8 +106,65 @@
         font-size: 10px;
         padding: 4px;
     }
+            #timeline {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 100px;
+  background: rgba(255,255,255,0.9);
+  border-top: 2px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Trocchi', serif;
+  z-index: 800;
 }
-        
+
+.timeline-container {
+  position: relative;
+  width: 85%;
+  height: 60px;
+}
+
+.timeline-bar {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: #ccc;
+  border-radius: 2px;
+  transform: translateY(-50%);
+}
+
+.timeline-marker {
+  position: absolute;
+  top: calc(50% - 8px);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #007bb8;
+  transition: left 0.05s linear;
+}
+
+.timeline-labels-top,
+.timeline-labels-bottom {
+  position: absolute;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #333;
+}
+
+.timeline-labels-top {
+  top: 0;
+}
+
+.timeline-labels-bottom {
+  bottom: 0;
+  color: #666;
+}
     </style>
 </head>
 <body>
@@ -289,9 +346,48 @@ async function fetchRoutes() {
   }
 
   if (allRouteCoords.length > 0) {
-    L.polyline(allRouteCoords, { color: "#007bb8", weight: 4 }).addTo(map);
+  const routeLine = L.polyline(allRouteCoords, { color: "#007bb8", weight: 4 }).addTo(map);
+  map.fitBounds(routeLine.getBounds());
+  animateMarker(allRouteCoords); // start the animation here
+  initTimeline(); // sync with the new timeline below
+}
   }
 } 
+    function animateMarker(routeCoords, duration = 60000) { // duration in ms
+  let progress = 0;
+  const totalSteps = routeCoords.length;
+  marker.setStyle({opacity: 1}); // make the circle visible
+
+  function step() {
+    const idx = Math.floor(progress);
+    if (idx < totalSteps - 1) {
+      marker.setLatLng(routeCoords[idx]);
+      progress += (totalSteps / (duration / 50)); // adjust speed here
+      requestAnimationFrame(step);
+    } else {
+      marker.setLatLng(routeCoords[totalSteps - 1]);
+    }
+  }
+  step();
+}
+    function initTimeline() {
+  const timelineMarker = document.getElementById("timeline-marker");
+  const startTime = Date.now();
+  const duration = 60000; // 60 sec animation, match animateMarker duration
+
+  function updateTimeline() {
+    const elapsed = Date.now() - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    timelineMarker.style.left = `calc(${progress * 100}% - 9px)`; // keep dot centered
+
+    if (progress < 1) {
+      requestAnimationFrame(updateTimeline);
+    }
+  }
+
+  updateTimeline();
+}
+    
      const logIcon = L.icon({
         iconUrl: 'log.png',  // Replace with your Captain’s Log icon
         iconSize: [20, 20],
@@ -362,56 +458,7 @@ async function fetchRoutes() {
     L.marker(entry.coords, { icon: icon }).addTo(map)
         .bindPopup(popupContent);
 });
-      const timelinePoints = [
-  { date: "October 2024", coords: [-34.03333, 18.349998] },   // Cape Town start
-  { date: "November 2024", coords: [-32.179535, 19.161850] }, 
- { date: "December 2024", coords: [-30.726940, 27.346464] },
-{ date: "February 2025", coords: [-31.069094, 28.362884] },
-{ date: "March 2025", coords: [-29.046574, 30.298712] },
-{ date: "April 2025", coords: [-29.508021, 30.231317] },
-{ date: "May 2025", coords: [-30.346384, 28.811371] },
-{ date: "June 2025", coords: [-29.848188, 31.023358] },
-{ date: "July 2025", coords: [-28.023694, 32.278251] },
-{ date: "August 2025", coords: [-27.084545, 32.555073] },
-{ date: "September 2025", coords: [-27.554230, 32.673139] },
- { date: "October 2025", coords: [30.832138, -27.768476] }
- ];
-        
-const timelineMarkers = timelinePoints.map(point => L.marker(point.coords, {
-  icon: L.divIcon({
-    className: "date-label",
-    html: `<div>${point.date}</div>`,
-    iconSize: [80, 20],
-    iconAnchor: [40, -10]
-  })
-}));
-
-function showTimelineMarkers() {
-  let index = 0;
-
-  function showNext() {
-    // Add marker to map
-    timelineMarkers[index].addTo(map);
-
-    // Determine delay: first marker 5s, rest 3s
-    const delay = index === 0 ? 5000 : 3000;
-
-    // Move to next marker after delay
-    setTimeout(() => {
-      // Optional: remove marker if you want flashing effect
-      timelineMarkers[index].remove();
-
-      index = (index + 1) % timelineMarkers.length; // loop back to start
-      showNext(); // recursive call
-    }, delay);
-  }
-
-  showNext(); // start the loop
-}
-
-// Call after map loads
-showTimelineMarkers();
-    
+      
     // legend
     const legend = L.control({ position: "topleft" });
 legend.onAdd = function(map) {
@@ -427,6 +474,31 @@ legend.addTo(map);
     
 fetchRoutes(); 
 </script>
+    
+  <div id="timeline">
+  <div class="timeline-container">
+    <div class="timeline-labels-top">
+      <span>Oct 2024</span>
+      <span>Dec 2024</span>
+      <span>Feb 2025</span>
+      <span>Apr 2025</span>
+      <span>Jun 2025</span>
+      <span>Aug 2025</span>
+      <span>Oct 2025</span>
+    </div>
+    <div class="timeline-bar"></div>
+    <div id="timeline-marker" class="timeline-marker"></div>
+    <div class="timeline-labels-bottom">
+      <span>0 km</span>
+      <span>400 km</span>
+      <span>800 km</span>
+      <span>1 200 km</span>
+      <span>1 600 km</span>
+      <span>2 000 km</span>
+      <span>2 400 km</span>
+    </div>
+  </div>
+</div>
     
 <footer>
         By <a href="https://www.linkedin.com/in/skylathornton/" target="_blank">Skyla Thornton</a>,
