@@ -383,7 +383,7 @@ async function fetchRoutes() {
  { lat: -27.768476, lng: 30.832138, mileage: 17514, date: "Oct '25" },
 
 ];
-   function initTimelineFromSignpoints(duration = 60000) {
+  function initSyncedAnimation(map, duration = 60000) {
   const timelineMarker = document.getElementById("timeline-marker");
   const labelsTop = document.querySelector(".timeline-labels-top");
   const labelsBottom = document.querySelector(".timeline-labels-bottom");
@@ -410,15 +410,24 @@ async function fetchRoutes() {
     labelsBottom.appendChild(bottomLabel);
   });
 
-  // Animate timeline marker
-  const startTime = Date.now();
-  function updateTimeline() {
-    const elapsed = Date.now() - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    timelineMarker.style.left = `calc(${progress * 100}% - 9px)`;
-    if (progress < 1) requestAnimationFrame(updateTimeline);
+  // Animate timeline marker and map marker together
+  const totalSteps = signpoints.length;
+  let stepIndex = 0;
+  const interval = duration / (totalSteps - 1);
+
+  function step() {
+    if (stepIndex < totalSteps) {
+      const sp = signpoints[stepIndex];
+      marker.setLatLng([sp.lat, sp.lng]);
+      timelineMarker.style.left = `calc(${(stepIndex / (totalSteps - 1)) * 100}% - 9px)`;
+      stepIndex++;
+      setTimeout(step, interval);
+    }
   }
-  updateTimeline();
+
+  // Show marker and start animation
+  marker.setStyle({ opacity: 1 });
+  step();
 }
     
      const logIcon = L.icon({
@@ -505,7 +514,10 @@ legend.onAdd = function(map) {
 };
 legend.addTo(map);
     
-fetchRoutes(); 
+fetchRoutes().then(() => {
+  initSyncedAnimation(map, 60000); // 60 seconds animation
+});
+    
 </script>
     
   <div id="timeline">
