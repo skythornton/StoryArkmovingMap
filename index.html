@@ -368,7 +368,39 @@ async function fetchRoutes() {
     animateMarker(allRouteCoords, map, signpoints);
   }
 }
+function computeCumulativeDistances(coords, map) {
+  const distances = [0];
+  for (let i = 1; i < coords.length; i++) {
+    const d = map.distance(coords[i - 1], coords[i]);
+    distances.push(distances[i - 1] + d);
+  }
+  return distances;
+}
 
+// --- Compute fraction along route for each signpoint (for syncing timeline) ---
+function computeSignpointFractions(routeCoords, signpoints, map) {
+  const distances = computeCumulativeDistances(routeCoords, map);
+  const totalDist = distances[distances.length - 1];
+
+  return signpoints.map(sp => {
+    let minDist = Infinity;
+    let minIdx = 0;
+
+    for (let i = 0; i < routeCoords.length; i++) {
+      const d = map.distance(routeCoords[i], [sp.lat, sp.lng]);
+      if (d < minDist) {
+        minDist = d;
+        minIdx = i;
+      }
+    }
+
+    return {
+      ...sp,
+      fraction: distances[minIdx] / totalDist
+    };
+  });
+}
+    
     function animateMarker(routeCoords, map, signpoints) {
   const totalDuration = 60000; // ms (adjust animation speed)
   let startTime = performance.now();
