@@ -357,72 +357,12 @@ async function fetchRoutes() {
   }
 }
 
-    function animateMarker(routeCoords, duration = 60000) { // duration in ms
-  let progress = 0;
-  const totalSteps = routeCoords.length;
-  marker.setStyle({opacity: 1}); // make the circle visible
+    function animateMarker(routeCoords, map, signpoints) {
+  const totalDuration = 60000; // ms (adjust animation speed)
+  let startTime = performance.now();
 
-  function step() {
-    const idx = Math.floor(progress);
-    if (idx < totalSteps - 1) {
-      marker.setLatLng(routeCoords[idx]);
-      progress += (totalSteps / (duration / 50)); // adjust speed here
-      requestAnimationFrame(step);
-    } else {
-      marker.setLatLng(routeCoords[totalSteps - 1]);
-    }
-  }
-  step();
-}
-    const signpoints = [
-  { lat: -34.03333, lng: 18.349998, mileage: 0, date: "Oct '24" },
-  { lat: -32.589442, lng: 18.995583, mileage: 1240, date: "Nov '24" },
-  { lat: -30.726940, lng: 27.346464, mileage: 3659, date: "Dec '24" },
-  { lat: -31.069094, lng: 28.362884, mileage: 6364, date: "Feb '25" },
- { lat: -29.046574, lng: 30.298712, mileage: 9294, date: "March '25" },
-{ lat: -30.346384, lng: 28.811371, mileage: 11969, date: "May '25" },
-{ lat: -29.848188, lng: 31.023358, mileage: 13628, date: "June '25" },
- { lat: -27.554230, lng: 32.673139, mileage: 16749, date: "Sept '25" },
- { lat: -27.768476, lng: 30.832138, mileage: 17514, date: "Oct '25" },
-
-];
-
-function computeCumulativeDistances(coords, map) {
-  const distances = [0];
-  for (let i = 1; i < coords.length; i++) {
-    const d = map.distance(coords[i - 1], coords[i]); // meters
-    distances.push(distances[i - 1] + d);
-  }
-  return distances;
-}
-
-// --- Helper: compute the fraction (0–1) of each signpost along the route ---
-function computeSignpointFractions(routeCoords, signpoints, map) {
-  const routeDistances = computeCumulativeDistances(routeCoords, map);
-  const totalDist = routeDistances[routeDistances.length - 1];
-
-  return signpoints.map(sp => {
-    // find the closest point on the route
-    let minIndex = 0;
-    let minDist = Infinity;
-    routeCoords.forEach((c, i) => {
-      const d = map.distance(c, [sp.lat, sp.lng]);
-      if (d < minDist) {
-        minDist = d;
-        minIndex = i;
-      }
-    });
-    const frac = routeDistances[minIndex] / totalDist;
-    return { ...sp, fraction: frac };
-  });
-}
-
-// --- Animate the map marker + timeline in sync ---
-function animateMarker(routeCoords, map, signpoints) {
-  const totalDuration = 60000; // ms (adjust for desired animation speed)
   const distances = computeCumulativeDistances(routeCoords, map);
   const totalDist = distances[distances.length - 1];
-  const startTime = performance.now();
 
   const marker = L.circleMarker(routeCoords[0], {
     radius: 7,
@@ -435,7 +375,7 @@ function animateMarker(routeCoords, map, signpoints) {
 
   function step(now) {
     const elapsed = now - startTime;
-    const progress = Math.min(elapsed / totalDuration, 1);
+    const progress = (elapsed % totalDuration) / totalDuration; // makes it loop
     const targetDist = totalDist * progress;
 
     // Find which segment we’re on
@@ -448,38 +388,30 @@ function animateMarker(routeCoords, map, signpoints) {
 
     marker.setLatLng([lat, lng]);
 
-    // Sync the timeline
+    // Sync the timeline marker
     updateTimeline(progress, syncedSignpoints);
 
-    if (progress < 1) {
-  requestAnimationFrame(animate);
-} else {
-  startTime = null;
-  requestAnimationFrame(animate);
-}
+    requestAnimationFrame(step);
+  }
 
   requestAnimationFrame(step);
 }
 
 // --- Update the timeline marker & label ---
 function updateTimeline(progress, signpoints) {
-  const bar = document.getElementById("timeline-bar");
   const marker = document.getElementById("timeline-marker");
-  const label = document.getElementById("timeline-label");
-
-  // move marker along the bar
   const percent = progress * 100;
   marker.style.left = `${percent}%`;
 
-  // find nearest signpoint by progress
-  const index = Math.floor(progress * (signpoints.length - 1));
-  const point = signpoints[index];
+  // Find nearest signpoint
+  const nearest = signpoints.reduce((prev, curr) => 
+    Math.abs(curr.fraction - progress) < Math.abs(prev.fraction - progress) ? curr : prev
+  );
 
-  // update label with your chosen parameters
-  label.textContent = `${point.date}  •  ${point.mileage} km`;
-
-  // optional: color bar up to progress
-  bar.style.width = `${percent}%`;
+  // Update top labels dynamically if desired
+  if (nearest) {
+    marker.title = `${nearest.date} • ${nearest.mileage} km`;
+  }
 }
 
     
@@ -571,35 +503,41 @@ legend.addTo(map);
     
 </script>
     
-  <div id="timeline">
+ <footer style="z-index: 1000;">
+  By <a href="https://www.linkedin.com/in/skylathornton/" target="_blank">Skyla Thornton</a>,
+  <a href="https://climate.sun.ac.za/" target="_blank">School for Climate Studies, Stellenbosch University</a>.
+</footer>
+
+<div id="timeline">
   <div class="timeline-container">
     <div class="timeline-labels-top">
       <span>Oct 2024</span>
+      <span>Nov 2024</span>
       <span>Dec 2024</span>
       <span>Feb 2025</span>
-      <span>Apr 2025</span>
+      <span>Mar 2025</span>
+      <span>May 2025</span>
       <span>Jun 2025</span>
-      <span>Aug 2025</span>
+      <span>Sep 2025</span>
       <span>Oct 2025</span>
     </div>
     <div class="timeline-bar"></div>
     <div id="timeline-marker" class="timeline-marker"></div>
     <div class="timeline-labels-bottom">
       <span>0 km</span>
-      <span>400 km</span>
-      <span>800 km</span>
-      <span>1 200 km</span>
-      <span>1 600 km</span>
-      <span>2 000 km</span>
-      <span>2 400 km</span>
+      <span>1240 km</span>
+      <span>3659 km</span>
+      <span>6364 km</span>
+      <span>9294 km</span>
+      <span>11969 km</span>
+      <span>13628 km</span>
+      <span>16749 km</span>
+      <span>17514 km</span>
     </div>
   </div>
 </div>
+
+<img id="static-car" src="storyark_car.png" alt="Car" />
     
-<footer>
-        By <a href="https://www.linkedin.com/in/skylathornton/" target="_blank">Skyla Thornton</a>,
-        <a href="https://climate.sun.ac.za/" target="_blank">School for Climate Studies, Stellenbosch University</a>.
-    </footer>
-    <img id="static-car" src="storyark_car.png" alt="Car" />
 </body>
 </html>
