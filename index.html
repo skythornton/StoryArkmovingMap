@@ -64,7 +64,7 @@
         
         #static-car {
     position: fixed;
-    bottom: 80px;
+    bottom: 90px;
     right: 20px;
     width: 200px;
     opacity: 0.9;
@@ -164,6 +164,8 @@
     footer {
         font-size: 10px;
         padding: 4px;
+        position: relative;
+        z-index: 100;
     }
         
     </style>
@@ -384,7 +386,7 @@ async function fetchRoutes() {
  { lat: -27.768476, lng: 30.832138, mileage: 17514, date: "Oct '25" },
 
 ];
-  // --- Helper: compute cumulative distances along the route ---
+
 function computeCumulativeDistances(coords, map) {
   const distances = [0];
   for (let i = 1; i < coords.length; i++) {
@@ -449,28 +451,35 @@ function animateMarker(routeCoords, map, signpoints) {
     // Sync the timeline
     updateTimeline(progress, syncedSignpoints);
 
-    if (progress < 1) requestAnimationFrame(step);
-  }
+    if (progress < 1) {
+  requestAnimationFrame(animate);
+} else {
+  startTime = null;
+  requestAnimationFrame(animate);
+}
 
   requestAnimationFrame(step);
 }
 
 // --- Update the timeline marker & label ---
 function updateTimeline(progress, signpoints) {
+  const bar = document.getElementById("timeline-bar");
   const marker = document.getElementById("timeline-marker");
   const label = document.getElementById("timeline-label");
-  if (!marker) return;
 
-  marker.style.left = `${progress * 100}%`;
+  // move marker along the bar
+  const percent = progress * 100;
+  marker.style.left = `${percent}%`;
 
-  // Find the nearest signpost based on fraction
-  const nearest = signpoints.reduce((a, b) =>
-    Math.abs(a.fraction - progress) < Math.abs(b.fraction - progress) ? a : b
-  );
+  // find nearest signpoint by progress
+  const index = Math.floor(progress * (signpoints.length - 1));
+  const point = signpoints[index];
 
-  if (label) {
-    label.innerText = `${nearest.date} (${nearest.mileage} km)`;
-  }
+  // update label with your chosen parameters
+  label.textContent = `${point.date}  •  ${point.mileage} km`;
+
+  // optional: color bar up to progress
+  bar.style.width = `${percent}%`;
 }
 
     
