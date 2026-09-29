@@ -116,6 +116,83 @@
   bottom: 0;
   color: #666;
 }
+        #timeline-dropdown {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 1000px;
+    z-index: 1000;
+    font-family: 'Lora', serif;
+}
+
+#timeline-toggle {
+    width: 100%;
+    padding: 10px 16px;
+    border: none;
+    background: white;
+    font-family: 'Trocchi', serif;
+    font-size: 18px;
+    cursor: pointer;
+    text-align: left;
+    border-radius: 6px;
+}
+
+#timeline-arrow {
+    float: right;
+}
+
+#timeline-content {
+    display: none;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 15px;
+    border-radius: 0 0 6px 6px;
+}
+
+#timeline-dropdown.open #timeline-content {
+    display: block;
+}
+
+.route-timeline {
+    margin-bottom: 20px;
+}
+
+.timeline-title {
+    font-family: 'Trocchi', serif;
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.timeline-container {
+    position: relative;
+    width: 100%;
+}
+
+.timeline-labels-top,
+.timeline-labels-bottom {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+}
+
+.timeline-bar {
+    height: 4px;
+    background: #007bb8;
+    margin: 10px 0;
+    position: relative;
+}
+
+.timeline-marker {
+    position: absolute;
+    top: 28px;
+    width: 12px;
+    height: 12px;
+    background: #007bb8;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+}
         
         @media (max-width: 768px) {
     h1 {
@@ -188,11 +265,42 @@ L.control.zoom({
     opacity: 1
 }).addTo(map);
 marker.setStyle({opacity: 0});
+
+    //timeline dropdown
+    const timelineDropdown = document.getElementById("timeline-dropdown");
+const timelineToggle = document.getElementById("timeline-toggle");
+
+timelineToggle.addEventListener("click", () => {
+    timelineDropdown.classList.toggle("open");
+});
     
     // Use OpenRouteService API to generate road-snapped route
 const apiKey = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjcwZDg4YTUzYTc4ZmU1NTc5ZGRhOTY3NGI4ODAwNDdlMjBhNzlmZjgwOTcxZTU2MjgxM2UwZWM0IiwiaCI6Im11cm11cjY0In0="; 
 
-  //Route coordinates
+//Year 1 to 3
+   const routes = [
+  {
+    name: "Year 1",
+    coordinates: coordinates,
+    signpoints: signpoints,
+    color: "#007bb8"
+  },
+    {
+    name: "Year 2",
+    coordinates: coordinates2,
+    signpoints: signpoints2,
+    color: "#007bb8"
+  },
+
+  {
+    name: "Year 3",
+    coordinates: coordinates3,
+    signpoints: signpoints3,
+    color: "#007bb8"
+  }
+];
+    
+  //Year 1 coordinates
     const coordinates = [
    [18.349998, -34.03333],
 [19.161850, -32.179535],
@@ -287,6 +395,7 @@ function chunkArray(arr, size) {
   return result;
 }
 
+    // Year 1 signpoints 
     const signpoints = [ 
         { lat: -34.03333, lng: 18.349998, mileage: 0, date: "Oct '24" }, 
         { lat: -32.589442, lng: 18.995583, mileage: 1240, date: "Nov '24" }, 
@@ -298,54 +407,123 @@ function chunkArray(arr, size) {
         { lat: -27.554230, lng: 32.673139, mileage: 16749, date: "Sept '25" }, 
         { lat: -27.768476, lng: 30.832138, mileage: 17514, date: "Oct '25" }, 
     ];
+
+    //Year 2 coordinates
+    const coordinates2 = [
+        [30.540476, -25.856234],
+        [29.9842212, -29.2123861],
+        [30.231317, -29.508021],
+        [31.0112822, -29.85506],
+        [31.7570315, -28.95216],
+        [30.653755, -30.45143225],
+        [30.2683935, -30.995525],
+        [30.297226, -30.9588906],
+        [30.0482111, -31.245581],
+        [29.5301513, -31.595634],
+        [28.375995, -32.6819347],
+        [28.053337, -32.8905575],
+        [28.109914, -32.8369757],
+        [27.6778506, -33.157824696],
+        [26.529789, -33.312897],
+        [26.896963, -33.5960593],
+        [24.5364713, -32.266586],
+        [25.3135014, -32.997350],
+        [25.489943, -33.915679],
+        [25.225541, -33.551682],
+        [25.489943, -33.9156798],
+        [24.5854209, -33.65870604],
+        [22.585003, -33.992489],
+        [22.94030, -34.0356649],
+        [23.058383, -34.0661567],
+        [22.940300, -34.03566490],
+        [22.206770, -33.588056],
+        [22.036386, -33.219335],
+        [20.117961, -33.787029],
+        [18.476598, -34.0929083],
+        [19.445989, -34.5565001],
+        [18.822822, -34.046439],
+        [20.1179617, -33.78702928],
+        [20.8866972, -33.7601669],
+        [28.034689, -26.2048788],
+        ];
+
+    //Year 2 signpoints
+    const signpoints2 = [
+       { lat: -25.856234, lng: 30.540476, mileage: 22773, date: "Jan '26" },
+       { lat: -29.508021, lng: 30.231317, mileage: 24539, date: "Feb '26" },
+       { lat: -30.9588906, lng: 30.297226, mileage: 25736, date: "March '26" },
+        { lat: -32.89055756, lng: 28.053337, mileage: 27561, date: "May '26" },
+        { lat: -33.65870604, lng: 24.5854209, mileage: 28007, date: "June '26" },
+        { lat: -34.03566490, lng: 22.940300, mileage: 29217, date: "July '26" },
+        { lat: -34.0929083, lng: 18.476598, mileage: 29817, date: "Aug '26" },
+        { lat: -26.2048788, lng: 28.034689, mileage: 31317, date: "Aug '26" },
+    ];
+
+    //Year 3 coordinates
+    //const coordinates3 = [
+        //[18.349998, -34.03333],
+        //[30.540476, -25.856234],
+    ];
+
+    //Year 3 signpoints
+    //const signpoints3 = [
+       //{ lat: -34.03333, lng: 18.349998, mileage: 0, date: "Oct '24" },
+      //{ lat: -32.589442, lng: 18.995583, mileage: 1240, date: "Nov '24" },
+   
+    ];
     
-async function fetchRoutes() {
-  const chunks = chunkArray(coordinates, 20); // keep below ORS 50 limit
+async function fetchRoute(route) {
+
+  const chunks = chunkArray(route.coordinates, 20);
   let allRouteCoords = [];
 
-  // Fetch each route segment only once
   for (let i = 0; i < chunks.length; i++) {
+
     const segment = (i < chunks.length - 1)
       ? [...chunks[i], chunks[i + 1][0]]
       : chunks[i];
 
     try {
-      const response = await fetch("https://api.heigit.org/openrouteservice/v2/directions/driving-car/geojson", {
-        method: "POST",
-        headers: {
-          "Authorization": apiKey,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ coordinates: segment })
-      });
+
+      const response = await fetch(
+        "https://api.heigit.org/openrouteservice/v2/directions/driving-car/geojson",
+        {
+          method: "POST",
+          headers: {
+            "Authorization": apiKey,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            coordinates: segment
+          })
+        }
+      );
+
       const data = await response.json();
 
       if (data.features && data.features[0]) {
-        const coords = data.features[0].geometry.coordinates.map(c => [c[1], c[0]]);
+
+        const coords =
+          data.features[0].geometry.coordinates.map(
+            c => [c[1], c[0]]
+          );
+
         allRouteCoords = allRouteCoords.concat(coords);
+
       } else {
+
         console.error("ORS error on segment", i, data);
+
       }
+
     } catch (err) {
+
       console.error("Fetch error on segment", i, err);
+
     }
   }
 
-  if (allRouteCoords.length > 0) {
-    const routeLine = L.polyline(allRouteCoords, { color: "#007bb8", weight: 4 }).addTo(map);
-    map.fitBounds(routeLine.getBounds());
-
-    // Start synced animation between map and timeline
-    animateMarker(allRouteCoords, map, signpoints);
-  }
-}
-function computeCumulativeDistances(coords, map) {
-  const distances = [0];
-  for (let i = 1; i < coords.length; i++) {
-    const d = map.distance(coords[i - 1], coords[i]);
-    distances.push(distances[i - 1] + d);
-  }
-  return distances;
+  return allRouteCoords;
 }
 
 // --- Compute fraction along route for each signpoint (for syncing timeline) ---
@@ -371,65 +549,175 @@ function computeSignpointFractions(routeCoords, signpoints, map) {
     };
   });
 }
+  // --- Animation ---  
     
-    function animateMarker(routeCoords, map, signpoints) {
-  const totalDuration = 60000; // ms (adjust animation speed)
-  let startTime = performance.now();
+    function animateMarker(routeCoords, map, signpoints, markerId, color) {
 
-  const distances = computeCumulativeDistances(routeCoords, map);
-  const totalDist = distances[distances.length - 1];
+  return new Promise(resolve => {
 
-  const marker = L.circleMarker(routeCoords[0], {
-    radius: 7,
-    color: "#007bb8",
-    fillColor: "#007bb8",
-    fillOpacity: 1
-  }).addTo(map);
+    const totalDuration = 60000;
+    const startTime = performance.now();
 
-  const syncedSignpoints = computeSignpointFractions(routeCoords, signpoints, map);
+    const distances = computeCumulativeDistances(routeCoords, map);
+    const totalDist = distances[distances.length - 1];
 
-  function step(now) {
-    const elapsed = now - startTime;
-    const progress = (elapsed % totalDuration) / totalDuration; // makes it loop
-    const targetDist = totalDist * progress;
+    const marker = L.circleMarker(routeCoords[0], {
+      radius: 7,
+      color: color,
+      fillColor: color,
+      fillOpacity: 1
+    }).addTo(map);
 
-    // Find which segment we’re on
-    let i = 0;
-    while (i < distances.length - 1 && distances[i + 1] < targetDist) i++;
+    const syncedSignpoints =
+      computeSignpointFractions(routeCoords, signpoints, map);
 
-    const segFrac = (targetDist - distances[i]) / (distances[i + 1] - distances[i]);
-    const lat = routeCoords[i][0] + (routeCoords[i + 1][0] - routeCoords[i][0]) * segFrac;
-    const lng = routeCoords[i][1] + (routeCoords[i + 1][1] - routeCoords[i][1]) * segFrac;
+    function step(now) {
 
-    marker.setLatLng([lat, lng]);
+      const elapsed = now - startTime;
 
-    // Sync the timeline marker
-    updateTimeline(progress, syncedSignpoints);
+      // Progress goes from 0 to 1 only once
+      const progress = Math.min(
+        elapsed / totalDuration,
+        1
+      );
+
+      const targetDist = totalDist * progress;
+
+      let i = 0;
+
+      while (
+        i < distances.length - 1 &&
+        distances[i + 1] < targetDist
+      ) {
+        i++;
+      }
+
+      if (i >= distances.length - 1) {
+        i = distances.length - 2;
+      }
+
+      const segmentDistance =
+        distances[i + 1] - distances[i];
+
+      const segFrac =
+        segmentDistance === 0
+          ? 0
+          : (targetDist - distances[i]) /
+            segmentDistance;
+
+      const lat =
+        routeCoords[i][0] +
+        (routeCoords[i + 1][0] - routeCoords[i][0]) *
+        segFrac;
+
+      const lng =
+        routeCoords[i][1] +
+        (routeCoords[i + 1][1] - routeCoords[i][1]) *
+        segFrac;
+
+      marker.setLatLng([lat, lng]);
+
+      updateTimeline(
+        progress,
+        syncedSignpoints,
+        markerId
+      );
+
+      // Route is finished
+      if (progress >= 1) {
+
+        marker.setLatLng(
+          routeCoords[routeCoords.length - 1]
+        );
+
+        resolve();
+
+        return;
+      }
+
+      requestAnimationFrame(step);
+    }
 
     requestAnimationFrame(step);
-  }
 
-  requestAnimationFrame(step);
+  });
 }
 
+    
 // --- Update the timeline marker & label ---
-function updateTimeline(progress, signpoints) {
-  const marker = document.getElementById("timeline-marker");
+function updateTimeline(progress, signpoints, markerId) {
+
+  const marker =
+    document.getElementById(markerId);
+
+  if (!marker) return;
+
   const percent = progress * 100;
+
   marker.style.left = `${percent}%`;
 
-  // Find nearest signpoint
-  const nearest = signpoints.reduce((prev, curr) => 
-    Math.abs(curr.fraction - progress) < Math.abs(prev.fraction - progress) ? curr : prev
+  const nearest = signpoints.reduce(
+    (prev, curr) =>
+      Math.abs(curr.fraction - progress) <
+      Math.abs(prev.fraction - progress)
+        ? curr
+        : prev
   );
 
-  // Update top labels dynamically if desired
   if (nearest) {
-    marker.title = `${nearest.date} • ${nearest.mileage} km`;
+    marker.title =
+      `${nearest.date} • ${nearest.mileage} km`;
   }
 }
-    
-    fetchRoutes();
+    async function playRoutes() {
+
+  for (let i = 0; i < routes.length; i++) {
+
+    const route = routes[i];
+
+    console.log(`Starting ${route.name}`);
+
+    // Fetch the road-snapped route
+    const routeCoords =
+      await fetchRoute(route);
+
+    if (!routeCoords.length) {
+      console.error(
+        `${route.name} could not be loaded`
+      );
+      continue;
+    }
+
+    // Draw the route
+    const routeLine = L.polyline(
+      routeCoords,
+      {
+        color: route.color,
+        weight: 4
+      }
+    ).addTo(map);
+
+    // Open timeline when Route 2 begins
+    if (i === 1) {
+      document
+        .getElementById("timeline-dropdown")
+        .classList.add("open");
+    }
+
+    // Animate this route
+    await animateMarker(
+      routeCoords,
+      map,
+      route.signpoints,
+      route.markerId,
+      route.color
+    );
+
+    console.log(`${route.name} finished`);
+
+  }
+}
+    playRoutes();
     
 </script>
     
@@ -438,7 +726,8 @@ function updateTimeline(progress, signpoints) {
   <a href="https://climate.sun.ac.za/" target="_blank">School for Climate Studies, Stellenbosch University</a>.
 </footer>
 
-<div id="timeline">
+    //Year 1 timeline
+<div id="timeline1">
   <div class="timeline-container">
     <div class="timeline-labels-top">
       <span>Oct 2024</span>
@@ -452,7 +741,7 @@ function updateTimeline(progress, signpoints) {
       <span>Oct 2025</span>
     </div>
     <div class="timeline-bar"></div>
-    <div id="timeline-marker" class="timeline-marker"></div>
+    <div id="timeline-marker-1" class="timeline-marker"></div>
     <div class="timeline-labels-bottom">
       <span>0 km</span>
       <span>1240 km</span>
@@ -467,6 +756,61 @@ function updateTimeline(progress, signpoints) {
   </div>
 </div>
 
+    <div class="route-timeline" id="timeline-2">
+    <div class="timeline-title">Route 2</div>
+    <div class="timeline-container">
+
+        <div class="timeline-labels-top">
+         <span>Jan 2026</span>
+          <span>Feb 2026</span>
+          <span>March 2026</span>
+          <span>May 2026</span>
+          <span>June 2026</span>
+          <span>July 2026</span>
+          <span>Aug 2026</span>
+          <span>Sep 2026</span>
+    </div>
+        <div class="timeline-bar"></div>
+        <div id="timeline-marker-2" class="timeline-marker"></div>
+
+        <div class="timeline-labels-bottom">
+           <span>22773 km</span>
+          <span>24539 km</span>
+          <span>25736 km</span>
+          <span>27651 km</span>
+          <span>28007 km</span>
+          <span>29217 km</span>
+          <span>29817 km</span>
+          <span>31317 km</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Route 3 timeline -->
+    <div class="route-timeline" id="timeline-3">
+
+      <div class="timeline-title">Route 3</div>
+
+      <div class="timeline-container">
+
+        <div class="timeline-labels-top">
+          <!-- Route 3 dates -->
+        </div>
+
+        <div class="timeline-bar"></div>
+
+        <div id="timeline-marker-3" class="timeline-marker"></div>
+
+        <div class="timeline-labels-bottom">
+          <!-- Route 3 mileage -->
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+    
 <img id="static-car" src="storyark_car.png" alt="Car" />
     
 </body>
