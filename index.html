@@ -380,19 +380,6 @@ function chunkArray(arr, size) {
         { lat: -26.2048788, lng: 28.034689, mileage: 31317, date: "Aug '26" },
     ];
 
-    //Year 3 coordinates
-    //const coordinates3 = [
-        //[18.349998, -34.03333],
-        //[30.540476, -25.856234],
-    //];
-
-    //Year 3 signpoints
-    //const signpoints3 = [
-       //{ lat: -34.03333, lng: 18.349998, mileage: 0, date: "Oct '24" },
-      //{ lat: -32.589442, lng: 18.995583, mileage: 1240, date: "Nov '24" },
-   
-    //];
-
     //Year 1 to 3
    const routes = [
   {
@@ -410,12 +397,6 @@ function chunkArray(arr, size) {
     colour: "#ffa500"
   },
 
-  //{
-    //name: "Year 3",
-    //coordinates: coordinates3,
-    //signpoints: signpoints3,
-    //color: "#007bb8"
-  //}
 ];
     
 async function fetchRoute(route) {
@@ -747,28 +728,6 @@ function updateTimeline(progress, signpoints, markerId) {
           <span>29217 km</span>
           <span>29817 km</span>
           <span>31317 km</span>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- Route 3 timeline -->
-    <div class="route-timeline" id="timeline-3">
-
-      <div class="timeline-title">Route 3</div>
-
-      <div class="timeline-container">
-
-        <div class="timeline-labels-top">
-          <!-- Route 3 dates -->
-        </div>
-
-        <div class="timeline-bar"></div>
-
-        <div id="timeline-marker-3" class="timeline-marker"></div>
-
-        <div class="timeline-labels-bottom">
-          <!-- Route 3 mileage -->
         </div>
 
       </div>
