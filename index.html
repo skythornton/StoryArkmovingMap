@@ -57,65 +57,7 @@
   border-radius: 4px;
   white-space: nowrap;
 }
-        #timeline {
-  position: fixed;
-  bottom: 30px;
-  width: 100%;
-  height: 100px;
-  background: rgba(255,255,255,0.9);
-  border-top: 2px solid #ccc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Trocchi', serif;
-  z-index: 800;
-}
 
-.timeline-container {
-  position: relative;
-  width: 85%;
-  height: 60px;
-}
-
-.timeline-bar {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background: #ccc;
-  border-radius: 2px;
-  transform: translateY(-50%);
-}
-
-.timeline-marker {
-  position: absolute;
-  top: calc(50% - 8px);
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #007bb8;
-  transition: left 0.05s linear;
-}
-
-.timeline-labels-top,
-.timeline-labels-bottom {
-  position: absolute;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  color: #333;
-}
-
-.timeline-labels-top {
-  top: 0;
-}
-
-.timeline-labels-bottom {
-  bottom: 0;
-  color: #666;
-}
         #timeline-dropdown {
     position: absolute;
     bottom: 20px;
@@ -212,6 +154,14 @@
         position: relative;
         z-index: 100;
     }
+
+    
+    const timelineDropdown = document.getElementById("timeline-dropdown");
+const timelineToggle = document.getElementById("timeline-toggle");
+
+timelineToggle.addEventListener("click", () => {
+    timelineDropdown.classList.toggle("open");
+});
         
     </style>
 </head>
@@ -266,39 +216,10 @@ L.control.zoom({
 }).addTo(map);
 marker.setStyle({opacity: 0});
 
-    //timeline dropdown
-    const timelineDropdown = document.getElementById("timeline-dropdown");
-const timelineToggle = document.getElementById("timeline-toggle");
-
-timelineToggle.addEventListener("click", () => {
-    timelineDropdown.classList.toggle("open");
-});
     
     // Use OpenRouteService API to generate road-snapped route
 const apiKey = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjcwZDg4YTUzYTc4ZmU1NTc5ZGRhOTY3NGI4ODAwNDdlMjBhNzlmZjgwOTcxZTU2MjgxM2UwZWM0IiwiaCI6Im11cm11cjY0In0="; 
 
-//Year 1 to 3
-   const routes = [
-  {
-    name: "Year 1",
-    coordinates: coordinates,
-    signpoints: signpoints,
-    color: "#007bb8"
-  },
-    {
-    name: "Year 2",
-    coordinates: coordinates2,
-    signpoints: signpoints2,
-    color: "#007bb8"
-  },
-
-  {
-    name: "Year 3",
-    coordinates: coordinates3,
-    signpoints: signpoints3,
-    color: "#007bb8"
-  }
-];
     
   //Year 1 coordinates
     const coordinates = [
@@ -471,6 +392,31 @@ function chunkArray(arr, size) {
       //{ lat: -32.589442, lng: 18.995583, mileage: 1240, date: "Nov '24" },
    
     //];
+
+    //Year 1 to 3
+   const routes = [
+  {
+    name: "Year 1",
+    coordinates: coordinates,
+    signpoints: signpoints,
+    markerId: "timeline-marker-1"
+    color: "#007bb8"
+  },
+    {
+    name: "Year 2",
+    coordinates: coordinates2,
+    signpoints: signpoints2,
+    markerId: "timeline-marker-2",
+    color: "#ffa500"
+  },
+
+  //{
+    //name: "Year 3",
+    //coordinates: coordinates3,
+    //signpoints: signpoints3,
+    //color: "#007bb8"
+  }
+];
     
 async function fetchRoute(route) {
 
@@ -736,33 +682,43 @@ function updateTimeline(progress, signpoints, markerId) {
     <div id="timeline-content">
 
     //Year 1 timeline
-<div id="timeline1">
-  <div class="timeline-container">
-    <div class="timeline-labels-top">
-      <span>Oct 2024</span>
-      <span>Nov 2024</span>
-      <span>Dec 2024</span>
-      <span>Feb 2025</span>
-      <span>Mar 2025</span>
-      <span>May 2025</span>
-      <span>Jun 2025</span>
-      <span>Sep 2025</span>
-      <span>Oct 2025</span>
+<div class="route-timeline" id="timeline-1">
+
+    <div class="timeline-title">Year 1</div>
+
+    <div class="timeline-container">
+
+        <div class="timeline-labels-top">
+            <span>Oct 2024</span>
+            <span>Nov 2024</span>
+            <span>Dec 2024</span>
+            <span>Feb 2025</span>
+            <span>Mar 2025</span>
+            <span>May 2025</span>
+            <span>Jun 2025</span>
+            <span>Sep 2025</span>
+            <span>Oct 2025</span>
+        </div>
+
+        <div class="timeline-bar"></div>
+
+        <div id="timeline-marker-1"
+             class="timeline-marker"></div>
+
+        <div class="timeline-labels-bottom">
+            <span>0 km</span>
+            <span>1240 km</span>
+            <span>3659 km</span>
+            <span>6364 km</span>
+            <span>9294 km</span>
+            <span>11969 km</span>
+            <span>13628 km</span>
+            <span>16749 km</span>
+            <span>17514 km</span>
+        </div>
+
     </div>
-    <div class="timeline-bar"></div>
-    <div id="timeline-marker-1" class="timeline-marker"></div>
-    <div class="timeline-labels-bottom">
-      <span>0 km</span>
-      <span>1240 km</span>
-      <span>3659 km</span>
-      <span>6364 km</span>
-      <span>9294 km</span>
-      <span>11969 km</span>
-      <span>13628 km</span>
-      <span>16749 km</span>
-      <span>17514 km</span>
-    </div>
-  </div>
+
 </div>
 
     <div class="route-timeline" id="timeline-2">
@@ -786,7 +742,7 @@ function updateTimeline(progress, signpoints, markerId) {
            <span>22773 km</span>
           <span>24539 km</span>
           <span>25736 km</span>
-          <span>27651 km</span>
+          <span>27561 km</span>
           <span>28007 km</span>
           <span>29217 km</span>
           <span>29817 km</span>
