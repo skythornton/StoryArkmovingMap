@@ -1,757 +1,468 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title>Story Ark Moving Map</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en"> <head> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Story Ark Moving Map</title>
 
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-     <link href="https://fonts.googleapis.com/css2?family=Trocchi&display=swap" rel="stylesheet">
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 
-    <style>
-        body { margin:0; padding:0; }
-        #map { width: 100%; height: 100vh; }
-        
-        
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500&family=Trocchi&display=swap" rel="stylesheet">
+
+<style>
+
+    /* =========================
+       PAGE
+    ========================= */
+
+    * {
+        box-sizing: border-box;
+    }
+
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        background: #ffffff;
+    }
+
+    body {
+        font-family: 'Lora', serif;
+        overflow-x: hidden;
+    }
+
+    /* =========================
+       TITLE
+    ========================= */
+
+    h1 {
+        margin: 18px 0 10px;
+        padding: 0 15px;
+        text-align: center;
+        font-family: 'Trocchi', serif;
+        font-size: 30px;
+        font-weight: 400;
+        letter-spacing: 0.03em;
+        line-height: 1.2;
+    }
+
+    /* =========================
+       MAP
+    ========================= */
+
+    #map {
+        position: relative;
+        width: 100%;
+        height: 600px;
+        overflow: hidden;
+    }
+
+    .leaflet-container {
+        font-family: 'Lora', serif;
+    }
+
+    /* =========================
+       ROUTES
+    ========================= */
+
+    .story-route {
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    /* =========================
+       MOVING MARKER
+    ========================= */
+
+    .moving-marker {
+        stroke: #ffffff;
+        stroke-width: 3;
+    }
+
+    /* =========================
+       TIMELINE DROPDOWN
+    ========================= */
+
+    #timeline-dropdown {
+        position: absolute;
+        left: 50%;
+        bottom: 18px;
+        transform: translateX(-50%);
+        width: min(92%, 1000px);
+        z-index: 1000;
+        font-family: 'Lora', serif;
+    }
+
+    #timeline-toggle {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        padding: 10px 16px;
+
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        border-radius: 7px;
+
+        background: rgba(255, 255, 255, 0.96);
+
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+
+        font-family: 'Trocchi', serif;
+        font-size: 17px;
+        color: #333;
+
+        cursor: pointer;
+        text-align: left;
+
+        transition: background 0.2s ease;
+    }
+
+    #timeline-toggle:hover {
+        background: #ffffff;
+    }
+
+    #timeline-arrow {
+        font-size: 20px;
+        line-height: 1;
+        transition: transform 0.2s ease;
+    }
+
+    #timeline-dropdown.open #timeline-arrow {
+        transform: rotate(180deg);
+    }
+
+    #timeline-content {
+        display: none;
+
+        margin-top: 5px;
+        padding: 18px 20px 16px;
+
+        border-radius: 7px;
+
+        background: rgba(255, 255, 255, 0.96);
+
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.13);
+
+        max-height: 240px;
+        overflow-y: auto;
+    }
+
+    #timeline-dropdown.open #timeline-content {
+        display: block;
+    }
+
+    /* =========================
+       INDIVIDUAL TIMELINES
+    ========================= */
+
+    .route-timeline {
+        margin-bottom: 22px;
+    }
+
+    .route-timeline:last-child {
+        margin-bottom: 0;
+    }
+
+    .timeline-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        margin-bottom: 10px;
+
+        font-family: 'Trocchi', serif;
+        font-size: 16px;
+        color: #333;
+    }
+
+    .timeline-colour {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex: 0 0 auto;
+    }
+
+    .timeline-container {
+        position: relative;
+        width: 100%;
+        padding: 0 4px;
+    }
+
+    .timeline-bar {
+        position: relative;
+        width: 100%;
+        height: 4px;
+
+        margin: 30px 0 28px;
+
+        border-radius: 5px;
+
+        background: #d5d5d5;
+    }
+
+    .timeline-progress {
+        position: absolute;
+        left: 0;
+        top: 0;
+
+        height: 100%;
+        width: 0%;
+
+        border-radius: 5px;
+    }
+
+    .timeline-marker {
+        position: absolute;
+
+        top: 50%;
+        left: 0;
+
+        width: 13px;
+        height: 13px;
+
+        border: 2px solid #ffffff;
+        border-radius: 50%;
+
+        transform: translate(-50%, -50%);
+
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+
+        z-index: 5;
+    }
+
+    /* =========================
+       TIMELINE LABELS
+    ========================= */
+
+    .timeline-labels {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: -25px;
+
+        height: 22px;
+    }
+
+    .timeline-date {
+        position: absolute;
+
+        transform: translateX(-50%);
+
+        white-space: nowrap;
+
+        font-size: 10px;
+        color: #444;
+    }
+
+    .timeline-mileage {
+        position: absolute;
+        top: 13px;
+
+        transform: translateX(-50%);
+
+        white-space: nowrap;
+
+        font-size: 9px;
+        color: #777;
+    }
+
+    /* =========================
+       FOOTER
+    ========================= */
+
+    footer {
+        position: relative;
+
+        width: 100%;
+
+        padding: 7px 10px;
+
+        text-align: center;
+
+        color: #777;
+
+        background: #ffffff;
+
+        font-size: 11px;
+
+        z-index: 1001;
+    }
+
+    footer a {
+        color: inherit;
+    }
+
+    /* =========================
+       CAR
+    ========================= */
+
+    #static-car {
+        position: absolute;
+
+        right: 20px;
+        bottom: 75px;
+
+        width: 150px;
+
+        opacity: 0.88;
+
+        z-index: 900;
+
+        pointer-events: none;
+    }
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 768px) {
+
         h1 {
-            text-align: center;
-            white-space: pre-wrap;
-            font-family: 'Trocchi', serif;
-            letter-spacing: 0.03em;
-            font-weight: 400;
-            margin: 20px 0 4px 0;
-            font-size: 30px;
+            margin: 12px 10px 8px;
+            font-size: 21px;
         }
 
         #map {
-            height: 600px;
+            height: 560px;
         }
-        
-        footer {
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-        text-align: center;
-        padding: 6px; 
-        color: #777;
-        font-size: 12px; 
-        background: #fff;
-        z-index: 700;
-    }
-        
-        #static-car {
-    position: fixed;
-    bottom: 120px;
-    right: 20px;
-    width: 200px;
-    opacity: 0.9;
-    z-index: 999;
-}
-        .date-label {
-  font-size: 14px;
-  font-weight: bold;
-  color: #007bb8;
-  background: rgba(255,255,255,0.8);
-  padding: 2px 6px;
-  border-radius: 4px;
-  white-space: nowrap;
-}
 
         #timeline-dropdown {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 1000px;
-    z-index: 1000;
-    font-family: 'Lora', serif;
-}
+            bottom: 12px;
+            width: 94%;
+        }
 
-#timeline-toggle {
-    width: 100%;
-    padding: 10px 16px;
-    border: none;
-    background: white;
-    font-family: 'Trocchi', serif;
-    font-size: 18px;
-    cursor: pointer;
-    text-align: left;
-    border-radius: 6px;
-}
+        #timeline-toggle {
+            padding: 9px 12px;
+            font-size: 15px;
+        }
 
-#timeline-arrow {
-    float: right;
-}
+        #timeline-content {
+            padding: 15px 12px 12px;
+            max-height: 220px;
+        }
 
-#timeline-content {
-    display: none;
-    background: rgba(255, 255, 255, 0.95);
-    padding: 15px;
-    border-radius: 0 0 6px 6px;
-}
+        .timeline-date {
+            font-size: 8px;
+        }
 
-#timeline-dropdown.open #timeline-content {
-    display: block;
-}
+        .timeline-mileage {
+            font-size: 8px;
+        }
 
-.route-timeline {
-    margin-bottom: 20px;
-}
+        #static-car {
+            width: 85px;
+            right: 10px;
+            bottom: 65px;
+        }
 
-.timeline-title {
-    font-family: 'Trocchi', serif;
-    font-size: 16px;
-    margin-bottom: 8px;
-}
-
-.timeline-container {
-    position: relative;
-    width: 100%;
-}
-
-.timeline-labels-top,
-.timeline-labels-bottom {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-}
-
-.timeline-bar {
-    height: 4px;
-    background: #007bb8;
-    margin: 10px 0;
-    position: relative;
-}
-
-.timeline-marker {
-    position: absolute;
-    top: 28px;
-    width: 12px;
-    height: 12px;
-    background: #007bb8;
-    border-radius: 50%;
-    transform: translateX(-50%);
-    z-index: 5;
-}
-        
-        @media (max-width: 768px) {
-    h1 {
-        font-size: 20px;
+        footer {
+            font-size: 9px;
+        }
     }
 
-
-    #static-car {
-        width: 100px;
-        bottom: 10px;
-        right: 10px;
-    }
-
-    footer {
-        font-size: 10px;
-        padding: 4px;
-        position: relative;
-        z-index: 100;
-    }
-
-    
-    const timelineDropdown = document.getElementById("timeline-dropdown");
-const timelineToggle = document.getElementById("timeline-toggle");
-
-timelineToggle.addEventListener("click", () => {
-    timelineDropdown.classList.toggle("open");
-});
-        
-    </style>
+</style>
 </head>
 <body>
-    
 <h1>THE STORY ARK JOURNEY</h1>
-    
-<div id="map"></div>
-
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-<script>
-    
-    const initialZoom = window.innerWidth < 768 ? 5 : 6; // Mobile = zoomed out
-
-    // Initialize map
-    const map = L.map('map', {
-    center: [-30.5595, 22.9375],
-    zoom: 4,
-    minZoom: 4,
-    maxZoom: 10,
-    maxBounds: [
-        [-37, 10],
-        [-20, 35]
-    ],
-    maxBoundsViscosity: 0.8,
-    zoomControl: false // turn off default
-});
-
-// Add custom zoom control on top right
-L.control.zoom({
-    position: 'topright' // move buttons
-}).addTo(map);
-    
-    // Base map
-    L.tileLayer(
-    'https://basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png?key=cb1_42vs_1_d558b3bef46e60815cc94c59',
-    {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-        maxZoom: 19
-    }
-).addTo(map);
-    
-    // circle marker
-    const marker = L.circleMarker([0, 0], {
-    radius: 8,
-    color: '#007bb8',
-    fillColor: '#007bb8',
-    fillOpacity: 1,
-    opacity: 1
-}).addTo(map);
-marker.setStyle({opacity: 0});
-
-    
-    // Use OpenRouteService API to generate road-snapped route
-const apiKey = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjcwZDg4YTUzYTc4ZmU1NTc5ZGRhOTY3NGI4ODAwNDdlMjBhNzlmZjgwOTcxZTU2MjgxM2UwZWM0IiwiaCI6Im11cm11cjY0In0="; 
-
-    
-  //Year 1 coordinates
-    const coordinates = [
-   [18.349998, -34.03333],
-[19.161850, -32.179535],
-[18.761217, -31.602021],
-[17.461603, -29.223664],
-[16.686399, -28.477564],
-[16.795256, -28.431223],
-[16.686399, -28.477564],
-[16.795256, -28.431223],
-[16.686399, -28.477564],
-[16.795256, -28.431223],
-[16.992807, -28.449563],
-[16.872967, -29.248082],
-[17.459885, -29.223238],
-[17.255891, -28.826061],
-[17.461603, -29.223664],
-[19.121273, -31.375852],
-[18.995583, -32.589442],
-[19.240376, -32.768078],
-[19.316716, -33.370650],
-[19.121616, -31.378930],
-[19.121616, -31.378930],
-[18.904297, -32.191707],
-[19.160992, -32.179245],
-[18.904297, -32.191707],
-[18.344407, -34.042428],
-[21.717070, -34.136678],
-[24.560429, -32.264106],
-[27.580207, -30.969788],
-[27.346464, -30.726940],
-[28.362884, -31.069094],
-[28.507239, -30.693476],
-[27.212492, -30.713391],
-[27.625553, -30.396194],
-[27.600738, -29.834139],
-[28.049644, -29.842547],
-[28.507329, -29.336696],
-[28.727215, -28.820461],
-[28.423295, -28.508730],
-[28.894324, -28.681384],
-[30.298712, -29.046574],
-[30.231317, -29.508021],
-[28.811371, -30.346384],
-[30.231317, -29.508021],
-[31.023358, -29.848188],
-[32.374727, -28.384668],
-[32.278165, -28.023921],
-[32.374727, -28.384668],
-[31.960267, -28.222068],
-[32.113818, -28.001138],
-[32.278251, -28.023694],
-[32.673139, -27.554230],
-[32.278165, -28.023997],
-[32.016010, -27.610293],
-[32.241230, -26.983030],
-[32.554137, -27.083288],
-[32.555073, -27.084545],
-[32.274560, -28.022898],
-[31.017903, -29.852395],
-[30.233892, -29.517805],
-[30.940842, -30.004725],
-[30.231317, -29.508021],
-[32.278251, -28.023694],
-[32.673139, -27.554230],
-[32.829112, -26.865665],
-[32.857627, -26.891302],
-[32.673139, -27.554230],
-[32.150915, -27.645594],
-[32.673139, -27.554230],
-[30.832138, -27.768476],
-[30.563480, -25.874569],
-[27.772201, -26.008783],
-[28.157879, -25.939629],
-[27.772201, -26.008783],
-[27.787009, -25.983909],
-[27.771337, -25.929673],
-[27.397333, -25.938877],
-[27.735040, -26.013445],
-[27.397333, -25.938877],
-[28.030447, -26.192969],
-[27.397333, -25.938877],
-[31.594938, -24.997074],
-[28.276896, -25.753121],
-[30.540476, -25.856234],
-];
-
-function chunkArray(arr, size) {
-  const result = [];
-  for (let i = 0; i < arr.length; i += size) {
-    result.push(arr.slice(i, i + size));
-  }
-  return result;
-}
-
-    // Year 1 signpoints 
-    const signpoints = [ 
-        { lat: -34.03333, lng: 18.349998, mileage: 0, date: "Oct '24" }, 
-        { lat: -32.589442, lng: 18.995583, mileage: 1240, date: "Nov '24" }, 
-        { lat: -30.726940, lng: 27.346464, mileage: 3659, date: "Dec '24" }, 
-        { lat: -31.069094, lng: 28.362884, mileage: 6364, date: "Feb '25" }, 
-        { lat: -29.046574, lng: 30.298712, mileage: 9294, date: "March '25" }, 
-        { lat: -30.346384, lng: 28.811371, mileage: 11969, date: "May '25" }, 
-        { lat: -29.848188, lng: 31.023358, mileage: 13628, date: "June '25" }, 
-        { lat: -27.554230, lng: 32.673139, mileage: 16749, date: "Sept '25" }, 
-        { lat: -27.768476, lng: 30.832138, mileage: 17514, date: "Oct '25" }, 
-    ];
-
-    //Year 2 coordinates
-    const coordinates2 = [
-        [30.540476, -25.856234],
-        [29.9842212, -29.2123861],
-        [30.231317, -29.508021],
-        [31.0112822, -29.85506],
-        [31.7570315, -28.95216],
-        [30.653755, -30.45143225],
-        [30.2683935, -30.995525],
-        [30.297226, -30.9588906],
-        [30.0482111, -31.245581],
-        [29.5301513, -31.595634],
-        [28.375995, -32.6819347],
-        [28.053337, -32.8905575],
-        [28.109914, -32.8369757],
-        [27.6778506, -33.157824696],
-        [26.529789, -33.312897],
-        [26.896963, -33.5960593],
-        [24.5364713, -32.266586],
-        [25.3135014, -32.997350],
-        [25.489943, -33.915679],
-        [25.225541, -33.551682],
-        [25.489943, -33.9156798],
-        [24.5854209, -33.65870604],
-        [22.585003, -33.992489],
-        [22.94030, -34.0356649],
-        [23.058383, -34.0661567],
-        [22.940300, -34.03566490],
-        [22.206770, -33.588056],
-        [22.036386, -33.219335],
-        [20.117961, -33.787029],
-        [18.476598, -34.0929083],
-        [19.445989, -34.5565001],
-        [18.822822, -34.046439],
-        [20.1179617, -33.78702928],
-        [20.8866972, -33.7601669],
-        [28.034689, -26.2048788],
-        ];
-
-    //Year 2 signpoints
-    const signpoints2 = [
-       { lat: -25.856234, lng: 30.540476, mileage: 22773, date: "Jan '26" },
-       { lat: -29.508021, lng: 30.231317, mileage: 24539, date: "Feb '26" },
-       { lat: -30.9588906, lng: 30.297226, mileage: 25736, date: "March '26" },
-        { lat: -32.89055756, lng: 28.053337, mileage: 27561, date: "May '26" },
-        { lat: -33.65870604, lng: 24.5854209, mileage: 28007, date: "June '26" },
-        { lat: -34.03566490, lng: 22.940300, mileage: 29217, date: "July '26" },
-        { lat: -34.0929083, lng: 18.476598, mileage: 29817, date: "Aug '26" },
-        { lat: -26.2048788, lng: 28.034689, mileage: 31317, date: "Aug '26" },
-    ];
-
-    //Year 1 to 3
-   const routes = [
-  {
-    name: "Year 1",
-    coordinates: coordinates,
-    signpoints: signpoints,
-    markerId: "timeline-marker-1",
-    colour: "#007bb8"
-  },
-    {
-    name: "Year 2",
-    coordinates: coordinates2,
-    signpoints: signpoints2,
-    markerId: "timeline-marker-2",
-    colour: "#ffa500"
-  },
-
-];
-    
-async function fetchRoute(route) {
-
-  const chunks = chunkArray(route.coordinates, 20);
-  let allRouteCoords = [];
-
-  for (let i = 0; i < chunks.length; i++) {
-
-    const segment = (i < chunks.length - 1)
-      ? [...chunks[i], chunks[i + 1][0]]
-      : chunks[i];
-
-    try {
-
-      const response = await fetch(
-        "https://api.heigit.org/openrouteservice/v2/directions/driving-car/geojson",
-        {
-          method: "POST",
-          headers: {
-            "Authorization": apiKey,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            coordinates: segment
-          })
-        }
-      );
-
-      const data = await response.json();
-
-      if (data.features && data.features[0]) {
-
-        const coords =
-          data.features[0].geometry.coordinates.map(
-            c => [c[1], c[0]]
-          );
-
-        allRouteCoords = allRouteCoords.concat(coords);
-
-      } else {
-
-        console.error("ORS error on segment", i, data);
-
-      }
-
-    } catch (err) {
-
-      console.error("Fetch error on segment", i, err);
-
-    }
-  }
-
-  return allRouteCoords;
-}
-
-// --- Compute fraction along route for each signpoint (for syncing timeline) ---
-function computeSignpointFractions(routeCoords, signpoints, map) {
-  const distances = computeCumulativeDistances(routeCoords, map);
-  const totalDist = distances[distances.length - 1];
-
-  return signpoints.map(sp => {
-    let minDist = Infinity;
-    let minIdx = 0;
-
-    for (let i = 0; i < routeCoords.length; i++) {
-      const d = map.distance(routeCoords[i], [sp.lat, sp.lng]);
-      if (d < minDist) {
-        minDist = d;
-        minIdx = i;
-      }
-    }
-
-    return {
-      ...sp,
-      fraction: distances[minIdx] / totalDist
-    };
-  });
-}
-  // --- Animation ---  
-    function computeCumulativeDistances(coords, map) {
-    const distances = [0];
-
-    for (let i = 1; i < coords.length; i++) {
-        const distance = map.distance(
-            coords[i - 1],
-            coords[i]
-        );
-
-        distances.push(
-            distances[i - 1] + distance
-        );
-    }
-
-    return distances;
-}
-    
-    function animateMarker(routeCoords, map, signpoints, markerId, color) {
-
-  return new Promise(resolve => {
-
-    const totalDuration = 60000;
-    const startTime = performance.now();
-
-    const distances = computeCumulativeDistances(routeCoords, map);
-    const totalDist = distances[distances.length - 1];
-
-    const marker = L.circleMarker(routeCoords[0], {
-      radius: 7,
-      color: color,
-      fillColor: color,
-      fillOpacity: 1
-    }).addTo(map);
-
-    const syncedSignpoints =
-      computeSignpointFractions(routeCoords, signpoints, map);
-
-    function step(now) {
-
-      const elapsed = now - startTime;
-
-      // Progress goes from 0 to 1 only once
-      const progress = Math.min(
-        elapsed / totalDuration,
-        1
-      );
-
-      const targetDist = totalDist * progress;
-
-      let i = 0;
-
-      while (
-        i < distances.length - 1 &&
-        distances[i + 1] < targetDist
-      ) {
-        i++;
-      }
-
-      if (i >= distances.length - 1) {
-        i = distances.length - 2;
-      }
-
-      const segmentDistance =
-        distances[i + 1] - distances[i];
-
-      const segFrac =
-        segmentDistance === 0
-          ? 0
-          : (targetDist - distances[i]) /
-            segmentDistance;
-
-      const lat =
-        routeCoords[i][0] +
-        (routeCoords[i + 1][0] - routeCoords[i][0]) *
-        segFrac;
-
-      const lng =
-        routeCoords[i][1] +
-        (routeCoords[i + 1][1] - routeCoords[i][1]) *
-        segFrac;
-
-      marker.setLatLng([lat, lng]);
-
-      updateTimeline(
-        progress,
-        syncedSignpoints,
-        markerId
-      );
-
-      // Route is finished
-      if (progress >= 1) {
-
-        marker.setLatLng(
-          routeCoords[routeCoords.length - 1]
-        );
-
-        resolve();
-
-        return;
-      }
-
-      requestAnimationFrame(step);
-    }
-
-    requestAnimationFrame(step);
-
-  });
-}
-
-    
-// --- Update the timeline marker & label ---
-function updateTimeline(progress, signpoints, markerId) {
-
-  const marker =
-    document.getElementById(markerId);
-
-  if (!marker) return;
-
-  const percent = progress * 100;
-
-  marker.style.left = `${percent}%`;
-
-  const nearest = signpoints.reduce(
-    (prev, curr) =>
-      Math.abs(curr.fraction - progress) <
-      Math.abs(prev.fraction - progress)
-        ? curr
-        : prev
-  );
-
-  if (nearest) {
-    marker.title =
-      `${nearest.date} • ${nearest.mileage} km`;
-  }
-}
-    async function playRoutes() {
-
-  for (let i = 0; i < routes.length; i++) {
-
-    const route = routes[i];
-
-    console.log(`Starting ${route.name}`);
-
-    // Fetch the road-snapped route
-    const routeCoords =
-      await fetchRoute(route);
-
-    if (!routeCoords.length) {
-      console.error(
-        `${route.name} could not be loaded`
-      );
-      continue;
-    }
-
-    // Draw the route
-    const routeLine = L.polyline(
-      routeCoords,
-      {
-        color: route.color,
-        weight: 4
-      }
-    ).addTo(map);
-
-    // Open timeline when Route 2 begins
-    if (i === 1) {
-      document
-        .getElementById("timeline-dropdown")
-        .classList.add("open");
-    }
-
-    // Animate this route
-    await animateMarker(
-      routeCoords,
-      map,
-      route.signpoints,
-      route.markerId,
-      route.color
-    );
-
-    console.log(`${route.name} finished`);
-
-  }
-}
-    playRoutes();
-    
-</script>
-    
- <footer style="z-index: 1000;">
-  By <a href="https://www.linkedin.com/in/skylathornton/" target="_blank">Skyla Thornton</a>,
-  <a href="https://climate.sun.ac.za/" target="_blank">School for Climate Studies, Stellenbosch University</a>.
-</footer>
-
-    <div id="timeline-dropdown">
-
-    <button id="timeline-toggle">
-        Journey timeline
+<div id="map">
+<!-- Timeline -->
+<div id="timeline-dropdown">
+
+    <button id="timeline-toggle" type="button">
+        <span>Journey timeline</span>
         <span id="timeline-arrow">⌄</span>
     </button>
 
     <div id="timeline-content">
 
-    //Year 1 timeline
-<div class="route-timeline" id="timeline-1">
-
-    <div class="timeline-title">Year 1</div>
-
-    <div class="timeline-container">
-
-        <div class="timeline-labels-top">
-            <span>Oct 2024</span>
-            <span>Nov 2024</span>
-            <span>Dec 2024</span>
-            <span>Feb 2025</span>
-            <span>Mar 2025</span>
-            <span>May 2025</span>
-            <span>Jun 2025</span>
-            <span>Sep 2025</span>
-            <span>Oct 2025</span>
-        </div>
-
-        <div class="timeline-bar"></div>
-
-        <div id="timeline-marker-1"
-             class="timeline-marker"></div>
-
-        <div class="timeline-labels-bottom">
-            <span>0 km</span>
-            <span>1240 km</span>
-            <span>3659 km</span>
-            <span>6364 km</span>
-            <span>9294 km</span>
-            <span>11969 km</span>
-            <span>13628 km</span>
-            <span>16749 km</span>
-            <span>17514 km</span>
-        </div>
+        <!-- Timelines are generated automatically by JavaScript -->
 
     </div>
 
 </div>
 
-    <div class="route-timeline" id="timeline-2">
-    <div class="timeline-title">Route 2</div>
-    <div class="timeline-container">
+<!-- Static car -->
+<img
+    id="static-car"
+    src="storyark_car.png"
+    alt="Car"
+>
+</div>
+<footer> By <a href="https://www.linkedin.com/in/skylathornton/" target="_blank"> Skyla Thornton </a>, <a href="https://climate.sun.ac.za/" target="_blank"> School for Climate Studies, Stellenbosch University </a>. </footer>
+<!-- Leaflet -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script> 
+//MAP SETUP
+const map = L.map('map', { 
+center: [-30.5595, 22.9375], 
+zoom: window.innerWidth < 768 ? 5 : 4, 
+minZoom: 4, 
+maxZoom: 10, 
+maxBounds: [ [-37, 10], [-20, 35] ], 
+maxBoundsViscosity: 0.8, 
+zoomControl: false }); L.control.zoom({ position: 'topright' }).addTo(map); 
+//CARTO BASEMAP 
+L.tileLayer( 'https://basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png?key=cb1_42vs_1_d558b3bef46e60815cc94c59', { attribution: '&copy; OpenStreetMap contributors &copy; CARTO', maxZoom: 19 } ).addTo(map); 
+//API KEY
+ const apiKey = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjcwZDg4YTUzYTc4ZmU1NTc5ZGRhOTY3NGI4ODAwNDdlMjBhNzlmZjgwOTcxZTU2MjgxM2UwZWM0IiwiaCI6Im11cm11cjY0In0="; 
+//YEAR 1 COORDINATES 
+ const coordinates = [ 
+[18.349998, -34.03333], [19.161850, -32.179535], [18.761217, -31.602021], [17.461603, -29.223664], [16.686399, -28.477564], [16.795256, -28.431223], [16.686399, -28.477564], [16.795256, -28.431223], [16.686399, -28.477564], [16.795256, -28.431223], [16.992807, -28.449563], [16.872967, -29.248082], [17.459885, -29.223238], [17.255891, -28.826061], [17.461603, -29.223664], [19.121273, -31.375852], [18.995583, -32.589442], [19.240376, -32.768078], [19.316716, -33.370650], [19.121616, -31.378930], [19.121616, -31.378930], [18.904297, -32.191707], [19.160992, -32.179245], [18.904297, -32.191707], [18.344407, -34.042428], [21.717070, -34.136678], [24.560429, -32.264106], [27.580207, -30.969788], [27.346464, -30.726940], [28.362884, -31.069094], [28.507239, -30.693476], [27.212492, -30.713391], [27.625553, -30.396194], [27.600738, -29.834139], [28.049644, -29.842547], [28.507329, -29.336696], [28.727215, -28.820461], [28.423295, -28.508730], [28.894324, -28.681384], [30.298712, -29.046574], [30.231317, -29.508021], [28.811371, -30.346384], [30.231317, -29.508021], [31.023358, -29.848188], [32.374727, -28.384668], [32.278165, -28.023921], [32.374727, -28.384668], [31.960267, -28.222068], [32.113818, -28.001138], [32.278251, -28.023694], [32.673139, -27.554230], [32.278165, -28.023997], [32.016010, -27.610293], [32.241230, -26.983030], [32.554137, -27.083288], [32.555073, -27.084545], [32.274560, -28.022898], [31.017903, -29.852395], [30.233892, -29.517805], [30.940842, -30.004725], [30.231317, -29.508021], [32.278251, -28.023694], [32.673139, -27.554230], [32.829112, -26.865665], [32.857627, -26.891302], [32.673139, -27.554230], [32.150915, -27.645594], [32.673139, -27.554230], [30.832138, -27.768476], [30.563480, -25.874569], [27.772201, -26.008783], [28.157879, -25.939629], [27.772201, -26.008783], [27.787009, -25.983909], [27.771337, -25.929673], [27.397333, -25.938877], [27.735040, -26.013445], [27.397333, -25.938877], [28.030447, -26.192969], [27.397333, -25.938877], [31.594938, -24.997074], [28.276896, -25.753121], [30.540476, -25.856234] 
+]; 
+//YEAR 1 TIMELINE POINTS 
+const signpoints = [ 
+{ lat: -34.03333, lng: 18.349998, mileage: 0, date: "Oct '24" }, 
+{ lat: -32.589442, lng: 18.995583, mileage: 1240, date: "Nov '24" }, 
+{ lat: -30.726940, lng: 27.346464, mileage: 3659, date: "Dec '24" }, 
+{ lat: -31.069094, lng: 28.362884, mileage: 6364, date: "Feb '25" }, 
+{ lat: -29.046574, lng: 30.298712, mileage: 9294, date: "Mar '25" }, 
+{ lat: -30.346384, lng: 28.811371, mileage: 11969, date: "May '25" }, 
+{ lat: -29.848188, lng: 31.023358, mileage: 13628, date: "Jun '25" }, 
+{ lat: -27.554230, lng: 32.673139, mileage: 16749, date: "Sep '25" }, 
+{ lat: -27.768476, lng: 30.832138, mileage: 17514, date: "Oct '25" } 
+]; 
+//YEAR 2 COORDINATES 
+const coordinates2 = [ 
+[30.540476, -25.856234], [29.9842212, -29.2123861], [30.231317, -29.508021], [31.0112822, -29.85506], [31.7570315, -28.95216], [30.653755, -30.45143225], [30.2683935, -30.995525], [30.297226, -30.9588906], [30.0482111, -31.245581], [29.5301513, -31.595634], [28.375995, -32.6819347], [28.053337, -32.8905575], [28.109914, -32.8369757], [27.6778506, -33.157824696], [26.529789, -33.312897], [26.896963, -33.5960593], [24.5364713, -32.266586], [25.3135014, -32.997350], [25.489943, -33.915679], [25.225541, -33.551682], [25.489943, -33.9156798], [24.5854209, -33.65870604], [22.585003, -33.992489], [22.94030, -34.0356649], [23.058383, -34.0661567], [22.940300, -34.03566490], [22.206770, -33.588056], [22.036386, -33.219335], [20.117961, -33.787029], [18.476598, -34.0929083], [19.445989, -34.5565001], [18.822822, -34.046439], [20.1179617, -33.78702928], [20.8866972, -33.7601669], [28.034689, -26.2048788] 
+]; 
+//YEAR 2 TIMELINE POINTS 
+const signpoints2 = [ 
+{ lat: -25.856234, lng: 30.540476, mileage: 22773, date: "Jan '26" }, 
+{ lat: -29.508021, lng: 30.231317, mileage: 24539, date: "Feb '26" }, 
+{ lat: -30.9588906, lng: 30.297226, mileage: 25736, date: "Mar '26" }, 
+{ lat: -32.89055756, lng: 28.053337, mileage: 27561, date: "May '26" }, 
+{ lat: -33.65870604, lng: 24.5854209, mileage: 28007, date: "Jun '26" }, 
+{ lat: -34.03566490, lng: 22.940300, mileage: 29217, date: "Jul '26" }, 
+{ lat: -34.0929083, lng: 18.476598, mileage: 29817, date: "Aug '26" }, 
+{ lat: -26.2048788, lng: 28.034689, mileage: 31317, date: "Aug '26" } 
+]; 
+//ROUTE DEFINITIONS
+const routes = [ { name: "Year 1", coordinates: coordinates, signpoints: signpoints, colour: "#007bb8", markerId: "timeline-marker-1", progressId: "timeline-progress-1" }, { name: "Year 2", coordinates: coordinates2, signpoints: signpoints2, colour: "#e59a00", markerId: "timeline-marker-2", progressId: "timeline-progress-2" } ]; 
+//TIMELINE DROPDOWN 
+const timelineDropdown = document.getElementById("timeline-dropdown"); const timelineToggle = document.getElementById("timeline-toggle"); timelineToggle.addEventListener("click", () => { timelineDropdown.classList.toggle("open"); }); 
+//CREATE TIMELINE HTML 
+function createTimeline(route) { 
+const container = document.createElement("div"); container.className = "route-timeline"; const title = document.createElement("div"); title.className = "timeline-title"; const colour = document.createElement("span"); colour.className = "timeline-colour"; colour.style.backgroundColor = route.colour; const titleText = document.createElement("span"); titleText.textContent = route.name; title.appendChild(colour); title.appendChild(titleText); const timelineContainer = document.createElement("div"); timelineContainer.className = "timeline-container"; const labels = document.createElement("div"); labels.className = "timeline-labels"; const bar = document.createElement("div"); bar.className = "timeline-bar"; const progress = document.createElement("div"); progress.className = "timeline-progress"; progress.id = route.progressId; progress.style.backgroundColor = route.colour; const marker = document.createElement("div"); marker.className = "timeline-marker"; marker.id = route.markerId; marker.style.backgroundColor = route.colour; bar.appendChild(progress); bar.appendChild(marker); 
+const firstMileage = route.signpoints[0].mileage; const lastMileage = route.signpoints[ route.signpoints.length - 1 ].mileage; const mileageRange = lastMileage - firstMileage; route.signpoints.forEach((point, index) => { const date = document.createElement("span"); date.className = "timeline-date"; date.textContent = point.date; const mileage = document.createElement("span"); mileage.className = "timeline-mileage"; mileage.textContent = `${point.mileage.toLocaleString()} km`; let percentage; if (mileageRange === 0) { percentage = 0; } else { percentage = ((point.mileage - firstMileage) / mileageRange) * 100; } /* * Keep first/last labels inside the * timeline instead of letting them * hang off the edges. */ if (index === 0) { date.style.left = "0%"; date.style.transform = "translateX(0)"; mileage.style.left = "0%"; mileage.style.transform = "translateX(0)"; } else if ( index === route.signpoints.length - 1 ) { date.style.left = "100%"; date.style.transform = "translateX(-100%)"; mileage.style.left = "100%"; mileage.style.transform = "translateX(-100%)"; } else { date.style.left = `${percentage}%`; mileage.style.left = `${percentage}%`; } labels.appendChild(date); labels.appendChild(mileage); }); timelineContainer.appendChild(labels); timelineContainer.appendChild(bar); container.appendChild(title); container.appendChild(timelineContainer); document .getElementById("timeline-content") .appendChild(container); } routes.forEach(createTimeline); 
+//CHUNK COORDINATES 
+function chunkArray(arr, size) { const result = []; for ( let i = 0; i < arr.length; i += size ) { result.push( arr.slice(i, i + size) ); } return result; } 
+//FETCH ROAD-SNAPPED ROUTE 
+async function fetchRoute(route) { const chunks = chunkArray(route.coordinates, 20); let allRouteCoords = []; for ( let i = 0; i < chunks.length; i++ ) { /* * Overlap the final coordinate of * one chunk with the next chunk. */ const segment = (i < chunks.length - 1) ? [ ...chunks[i], chunks[i + 1][0] ] : chunks[i]; try { const response = await fetch( "https://api.heigit.org/openrouteservice/v2/directions/driving-car/geojson", { method: "POST", headers: { "Authorization": apiKey, "Content-Type": "application/json" }, body: JSON.stringify({ coordinates: segment }) } ); if (!response.ok) { console.error( `ORS HTTP error ${response.status} on ${route.name}, segment ${i}` ); continue; } const data = await response.json(); if ( data.features && data.features[0] && data.features[0].geometry ) { const coords = data.features[0] .geometry .coordinates .map( c => [c[1], c[0]] ); /* * Avoid duplicating the first * coordinate of overlapping chunks. */ if (allRouteCoords.length > 0) { coords.shift(); } allRouteCoords = allRouteCoords.concat(coords); } else { console.error( "ORS returned no route:", route.name, i, data ); } } catch (error) { console.error( "Route fetch error:", route.name, i, error ); } } return allRouteCoords; } 
+//CUMULATIVE DISTANCES 
+function computeCumulativeDistances( coords, map ) { const distances = [0]; for ( let i = 1; i < coords.length; i++ ) { const distance = map.distance( coords[i - 1], coords[i] ); distances.push( distances[i - 1] + distance ); } return distances; } 
+//FIND SIGNPOINT POSITIONS 
+function computeSignpointFractions( routeCoords, signpoints, map ) { const distances = computeCumulativeDistances( routeCoords, map ); const totalDist = distances[ distances.length - 1 ]; return signpoints.map(point => { let minimumDistance = Infinity; let closestIndex = 0; for ( let i = 0; i < routeCoords.length; i++ ) { const distance = map.distance( routeCoords[i], [ point.lat, point.lng ] ); if ( distance < minimumDistance ) { minimumDistance = distance; closestIndex = i; } } return { ...point, fraction: totalDist > 0 ? distances[closestIndex] / totalDist : 0 }; }); }
+//UPDATE TIMELINE 
+function updateTimeline( progress, signpoints, markerId, progressId ) { const marker = document.getElementById( markerId ); const progressBar = document.getElementById( progressId ); if (!marker) return; const percent = progress * 100; marker.style.left = `${percent}%`; if (progressBar) { progressBar.style.width = `${percent}%`; } 
+if (signpoints.length) { const nearest = signpoints.reduce( (previous, current) => { return Math.abs( current.fraction - progress ) < Math.abs( previous.fraction - progress ) ? current : previous; } ); marker.title = `${nearest.date} • ${nearest.mileage.toLocaleString()} km`; } } 
 
-        <div class="timeline-labels-top">
-         <span>Jan 2026</span>
-          <span>Feb 2026</span>
-          <span>March 2026</span>
-          <span>May 2026</span>
-          <span>June 2026</span>
-          <span>July 2026</span>
-          <span>Aug 2026</span>
-          <span>Sep 2026</span>
-    </div>
-        <div class="timeline-bar"></div>
-        <div id="timeline-marker-2" class="timeline-marker"></div>
+//ANIMATE MARKER 
+function animateMarker( routeCoords, signpoints, markerId, progressId, colour ) { return new Promise(resolve => { /* * 60 seconds per route. * * Change this number if you want * the journey faster or slower. */ const totalDuration = 60000; const startTime = performance.now(); const distances = computeCumulativeDistances( routeCoords, map ); const totalDistance = distances[ distances.length - 1 ]; /* * Create the moving map marker. */ const movingMarker = L.circleMarker( routeCoords[0], { radius: 7, color: "#ffffff", weight: 3, fillColor: colour, fillOpacity: 1, className: "moving-marker" } ).addTo(map); const syncedSignpoints = computeSignpointFractions( routeCoords, signpoints, map ); function step(now) { const elapsed = now - startTime; const progress = Math.min( elapsed / totalDuration, 1 ); const targetDistance = totalDistance * progress; /* * Find which segment of the * route the marker is currently on. */ let index = 0; while ( index < distances.length - 1 && distances[index + 1] < targetDistance ) { index++; } if ( index >= distances.length - 1 ) { index = distances.length - 2; } const segmentDistance = distances[index + 1] - distances[index]; const segmentFraction = segmentDistance === 0 ? 0 : ( targetDistance - distances[index] ) / segmentDistance; const lat = routeCoords[index][0] + ( routeCoords[index + 1][0] - routeCoords[index][0] ) * segmentFraction; const lng = routeCoords[index][1] + ( routeCoords[index + 1][1] - routeCoords[index][1] ) * segmentFraction; movingMarker.setLatLng( [lat, lng] ); /* * Move the corresponding * timeline marker at exactly * the same progress. */ updateTimeline( progress, syncedSignpoints, markerId, progressId ); if (progress >= 1) { movingMarker.setLatLng( routeCoords[ routeCoords.length - 1 ] ); updateTimeline( 1, syncedSignpoints, markerId, progressId ); resolve(); return; } requestAnimationFrame(step); } requestAnimationFrame(step); }); } 
 
-        <div class="timeline-labels-bottom">
-           <span>22773 km</span>
-          <span>24539 km</span>
-          <span>25736 km</span>
-          <span>27561 km</span>
-          <span>28007 km</span>
-          <span>29217 km</span>
-          <span>29817 km</span>
-          <span>31317 km</span>
-        </div>
+//DRAW A ROUTE 
+function drawRoute( routeCoords, route, active = false ) { return L.polyline( routeCoords, { color: route.colour, weight: active ? 5 : 3, opacity: active ? 0.9 : 0.48, className: "story-route", lineCap: "round", lineJoin: "round" } ).addTo(map); } 
+// MAIN PLAY FUNCTION 
+async function playRoutes() { console.log( "Loading Story Ark routes..." ); const routeResults = await Promise.all( routes.map(async route => { const routeCoords = await fetchRoute(route); return { route, routeCoords }; }) ); routeResults.forEach(result => { if ( result.routeCoords.length ) { drawRoute( result.routeCoords, result.route, false ); } }); const validRoutes = routeResults.filter( result => result.routeCoords.length ); if (!validRoutes.length) { console.error( "No routes could be loaded." ); return; } for ( const result of validRoutes ) { const { route, routeCoords } = result; console.log( `Starting route.name`);/**Maketheactiverouteslightly*moreprominent.*/drawRoute(routeCoords,route,true);/**Animatemarker+timelinetogether.*/awaitanimateMarker(routeCoords,route.signpoints,route.markerId,route.progressId,route.colour);console.log(`{route.name} finished` ); } console.log( "Story Ark journey complete." ); } /* ============================================================ START ============================================================ */ playRoutes(); </script>
+</body> </html>
 
-      </div>
-    </div>
-
-  </div>
-    
-<img id="static-car" src="storyark_car.png" alt="Car" />
-    
-</body>
-</html>
