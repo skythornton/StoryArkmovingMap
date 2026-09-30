@@ -477,6 +477,22 @@ function computeSignpointFractions(routeCoords, signpoints, map) {
   });
 }
   // --- Animation ---  
+    function computeCumulativeDistances(coords, map) {
+    const distances = [0];
+
+    for (let i = 1; i < coords.length; i++) {
+        const distance = map.distance(
+            coords[i - 1],
+            coords[i]
+        );
+
+        distances.push(
+            distances[i - 1] + distance
+        );
+    }
+
+    return distances;
+}
     
     function animateMarker(routeCoords, map, signpoints, markerId, color) {
 
