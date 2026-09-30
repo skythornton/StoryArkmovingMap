@@ -406,21 +406,6 @@ maxBounds: [[-50, 10], [-20, 35]],
 maxBoundsViscosity: 0.8, 
 zoomControl: false }); 
 L.control.zoom({ position: 'topright' }).addTo(map);
-if (window.innerWidth < 768) {
-    const topPoint = [-21, 24];
-    const bottomPoint = [-43, 24];
-    const initialBounds = L.latLngBounds(
-        topPoint,
-        bottomPoint
-    );
-    map.fitBounds(initialBounds, {
-        paddingTopLeft: [10, 10],
-        paddingBottomRight: [10, 10],
-        animate: false
-    });
-} else {
-    map.setView([-30.5595, 22.9375], 4);
-}
     
 //CARTO BASEMAP 
 L.tileLayer( 'https://basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png?key=cb1_42vs_1_d558b3bef46e60815cc94c59', { attribution: '&copy; OpenStreetMap contributors &copy; CARTO', maxZoom: 19 } ).addTo(map); 
