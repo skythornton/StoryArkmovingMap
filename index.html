@@ -571,10 +571,113 @@ const routes = [ { name: "Year 1", coordinates: coordinates, signpoints: signpoi
 
 //TIMELINE DROPDOWN 
 const timelineDropdown = document.getElementById("timeline-dropdown"); const timelineToggle = document.getElementById("timeline-toggle"); timelineToggle.addEventListener("click", () => { timelineDropdown.classList.toggle("open"); }); 
-//CREATE TIMELINE HTML 
+//CREATE TIMELINE HTML
 function createTimeline(route) { 
-const container = document.createElement("div"); container.className = "route-timeline"; const title = document.createElement("div"); title.className = "timeline-title"; const colour = document.createElement("span"); colour.className = "timeline-colour"; colour.style.backgroundColor = route.colour; const titleText = document.createElement("span"); titleText.textContent = route.name; title.appendChild(colour); title.appendChild(titleText); const timelineContainer = document.createElement("div"); timelineContainer.className = "timeline-container"; const labels = document.createElement("div"); labels.className = "timeline-labels"; const bar = document.createElement("div"); bar.className = "timeline-bar"; const progress = document.createElement("div"); progress.className = "timeline-progress"; progress.id = route.progressId; progress.style.backgroundColor = route.colour; const marker = document.createElement("div"); marker.className = "timeline-marker"; marker.id = route.markerId; marker.style.backgroundColor = route.colour; bar.appendChild(progress); bar.appendChild(marker); 
-const firstMileage = route.signpoints[0].mileage; const lastMileage = route.signpoints[ route.signpoints.length - 1 ].mileage; const mileageRange = lastMileage - firstMileage; route.signpoints.forEach((point, index) => { const date = document.createElement("span"); date.className = "timeline-date"; date.textContent = point.date; const mileage = document.createElement("span"); mileage.className = "timeline-mileage"; mileage.textContent = `${point.mileage.toLocaleString()} km`; let percentage; if (mileageRange === 0) { percentage = 0; } else { percentage = ((point.mileage - firstMileage) / mileageRange) * 100; } /* * Keep first/last labels inside the * timeline instead of letting them * hang off the edges. */ if (index === 0) { date.style.left = "0%"; date.style.transform = "translateX(0)"; mileage.style.left = "0%"; mileage.style.transform = "translateX(0)"; } else if ( index === route.signpoints.length - 1 ) { date.style.left = "100%"; date.style.transform = "translateX(-100%)"; mileage.style.left = "100%"; mileage.style.transform = "translateX(-100%)"; } else { date.style.left = `${percentage}%`; mileage.style.left = `${percentage}%`; } labels.appendChild(date); labels.appendChild(mileage); }); timelineContainer.appendChild(labels); timelineContainer.appendChild(bar); container.appendChild(title); container.appendChild(timelineContainer); document .getElementById("timeline-content") .appendChild(container); } routes.forEach(createTimeline); 
+    const container = document.createElement("div"); 
+    container.className = "route-timeline"; 
+
+    const title = document.createElement("div"); 
+    title.className = "timeline-title"; 
+
+    const colour = document.createElement("span"); 
+    colour.className = "timeline-colour"; 
+    colour.style.backgroundColor = route.colour; 
+
+    const titleText = document.createElement("span"); 
+    titleText.textContent = route.name; 
+
+    title.appendChild(colour); 
+    title.appendChild(titleText); 
+
+    const timelineContainer = document.createElement("div"); 
+    timelineContainer.className = "timeline-container"; 
+
+    const labels = document.createElement("div"); 
+    labels.className = "timeline-labels"; 
+
+    const bar = document.createElement("div"); 
+    bar.className = "timeline-bar"; 
+
+    const progress = document.createElement("div"); 
+    progress.className = "timeline-progress"; 
+    progress.id = route.progressId; 
+    progress.style.backgroundColor = route.colour; 
+
+    const marker = document.createElement("div"); 
+    marker.className = "timeline-marker"; 
+    marker.id = route.markerId; 
+    marker.style.backgroundColor = route.colour; 
+
+    bar.appendChild(progress); 
+    bar.appendChild(marker); 
+
+    const firstMileage = route.signpoints[0].mileage; 
+    const lastMileage = route.signpoints[route.signpoints.length - 1].mileage; 
+    const mileageRange = lastMileage - firstMileage; 
+
+    route.signpoints.forEach((point, index) => { 
+
+        const date = document.createElement("span"); 
+        date.className = "timeline-date"; 
+        date.textContent = point.date; 
+
+        const mileage = document.createElement("span"); 
+        mileage.className = "timeline-mileage"; 
+        mileage.textContent = `${point.mileage.toLocaleString()} km`; 
+
+        let percentage;
+
+        if (mileageRange === 0) {
+            percentage = 0;
+        } else {
+            percentage = ((point.mileage - firstMileage) / mileageRange) * 100;
+        }
+
+        if (index === 0) {
+            date.style.left = "0%";
+            date.style.transform = "translateX(0)";
+            mileage.style.left = "0%";
+            mileage.style.transform = "translateX(0)";
+
+        } else if (index === route.signpoints.length - 1) {
+            date.style.left = "100%";
+            date.style.transform = "translateX(-100%)";
+            mileage.style.left = "100%";
+            mileage.style.transform = "translateX(-100%)";
+
+        } else {
+            date.style.left = `${percentage}%`;
+            mileage.style.left = `${percentage}%`;
+        }
+
+        labels.appendChild(date);
+        labels.appendChild(mileage);
+    });
+
+    timelineContainer.appendChild(labels);
+    timelineContainer.appendChild(bar);
+
+    container.appendChild(title);
+    container.appendChild(timelineContainer);
+
+    document
+        .getElementById("timeline-content")
+        .appendChild(container);
+}
+
+routes.forEach(createTimeline);
+
+
+// Initially show only Year 1
+const timeline1 = document.querySelectorAll(".route-timeline")[0];
+const timeline2 = document.querySelectorAll(".route-timeline")[1];
+
+if (timeline1) timeline1.style.display = "block";
+if (timeline2) timeline2.style.display = "none";
+
+// Open timeline automatically when map loads
+timelineDropdown.classList.add("open");
+
 //CHUNK COORDINATES 
 function chunkArray(arr, size) { const result = []; for ( let i = 0; i < arr.length; i += size ) { result.push( arr.slice(i, i + size) ); } return result; } 
 // FETCH ROAD-SNAPPED ROUTE
@@ -597,10 +700,139 @@ function animateMarker( routeCoords, signpoints, markerId, progressId, colour ) 
 
 //DRAW A ROUTE 
 function drawRoute( routeCoords, route, active = false ) { return L.polyline( routeCoords, { color: route.colour, weight: active ? 5 : 3, opacity: active ? 0.9 : 0.48, className: "story-route", lineCap: "round", lineJoin: "round" } ).addTo(map); } 
-// MAIN PLAY FUNCTION 
-async function playRoutes() { console.log("Loading Story Ark routes..."); const routeResults = await Promise.all( routes.map(async route => { const routeCoords = await fetchRoute(route); return { route, routeCoords }; }) ); routeResults.forEach(result => { if ( result.routeCoords.length ) { drawRoute( result.routeCoords, result.route, false ); } }); const validRoutes = routeResults.filter( result => result.routeCoords.length ); if (!validRoutes.length) { console.error( "No routes could be loaded." ); return; } for ( const result of validRoutes ) { const { route, routeCoords } = result; console.log( `Starting ${route.name}`);drawRoute(routeCoords,route,true);await animateMarker(routeCoords,route.signpoints,route.markerId,route.progressId,route.colour);console.log(`{route.name} finished` ); } console.log( "Story Ark journey complete." ); } 
+// MAIN PLAY FUNCTION
+async function playRoutes() {
 
-//START
+    console.log("Loading Story Ark routes...");
+
+    // Fetch all routes first so that all route lines can appear on the map
+    const routeResults = await Promise.all(
+        routes.map(async route => {
+            const routeCoords = await fetchRoute(route);
+            return { route, routeCoords };
+        })
+    );
+
+    // Draw all routes faintly first
+    routeResults.forEach(result => {
+        if (result.routeCoords.length) {
+            drawRoute(result.routeCoords, result.route, false);
+        }
+    });
+
+    const validRoutes = routeResults.filter(
+        result => result.routeCoords.length
+    );
+
+    if (!validRoutes.length) {
+        console.error("No routes could be loaded.");
+        return;
+    }
+
+    // Get timeline elements
+    const timelineElements = document.querySelectorAll(".route-timeline");
+
+    // ---------------------------------
+    // YEAR 1
+    // ---------------------------------
+
+    if (validRoutes[0]) {
+
+        const { route, routeCoords } = validRoutes[0];
+
+        console.log(`Starting ${route.name}`);
+
+        // Show Year 1 timeline
+        if (timelineElements[0]) {
+            timelineElements[0].style.display = "block";
+        }
+
+        // Hide Year 2 timeline
+        if (timelineElements[1]) {
+            timelineElements[1].style.display = "none";
+        }
+
+        // Highlight Year 1 route
+        drawRoute(routeCoords, route, true);
+
+        // Run Year 1 route AND timeline together
+        await animateMarker(
+            routeCoords,
+            route.signpoints,
+            route.markerId,
+            route.progressId,
+            route.colour
+        );
+
+        console.log(`${route.name} finished`);
+
+        // ---------------------------------
+        // SWITCH FROM YEAR 1 → YEAR 2
+        // ---------------------------------
+
+        // Remove Year 1 timeline
+        if (timelineElements[0]) {
+            timelineElements[0].style.display = "none";
+        }
+
+        // Reset Year 1 timeline
+        const year1Marker = document.getElementById(route.markerId);
+        const year1Progress = document.getElementById(route.progressId);
+
+        if (year1Marker) {
+            year1Marker.style.left = "0%";
+        }
+
+        if (year1Progress) {
+            year1Progress.style.width = "0%";
+        }
+    }
+
+    // ---------------------------------
+    // YEAR 2
+    // ---------------------------------
+
+    if (validRoutes[1]) {
+
+        const { route, routeCoords } = validRoutes[1];
+
+        console.log(`Starting ${route.name}`);
+
+        // Show Year 2 timeline
+        if (timelineElements[1]) {
+            timelineElements[1].style.display = "block";
+        }
+
+        // Reset Year 2 timeline before starting
+        const year2Marker = document.getElementById(route.markerId);
+        const year2Progress = document.getElementById(route.progressId);
+
+        if (year2Marker) {
+            year2Marker.style.left = "0%";
+        }
+
+        if (year2Progress) {
+            year2Progress.style.width = "0%";
+        }
+
+        // Highlight Year 2 route
+        drawRoute(routeCoords, route, true);
+
+        // Run Year 2 route AND timeline together
+        await animateMarker(
+            routeCoords,
+            route.signpoints,
+            route.markerId,
+            route.progressId,
+            route.colour
+        );
+
+        console.log(`${route.name} finished`);
+    }
+
+    console.log("Story Ark journey complete.");
+}
+    //START
 
     playRoutes(); 
 </script>
